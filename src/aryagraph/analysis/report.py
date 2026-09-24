@@ -288,6 +288,8 @@ def analyze(
         from ..algorithms.matrix import algebraic_connectivity
 
         s["algebraic_connectivity"] = step("algebraic connectivity", lambda: algebraic_connectivity(und))
+    elif n > 1500:
+        rep.notes.append(f"algebraic connectivity skipped: {n:,} nodes (> 1,500)")
     rep.degree_histogram = step("degree histogram", lambda: S.degree_histogram(g)) or []
     rep.summary = {k: (float(v) if isinstance(v, float) else v) for k, v in s.items()}
 
@@ -309,6 +311,8 @@ def analyze(
             cl = step("closeness", lambda: C.closeness_centrality(g, weight=weight))
             if cl is not None:
                 cent["closeness"] = cl
+        else:
+            rep.notes.append(f"closeness skipped: {n:,} nodes (> {EXACT_LIMIT:,})")
         if not g.directed or not (g.is_dag() if hasattr(g, "is_dag") else False):
             ev = step("eigenvector", lambda: C.eigenvector_centrality(g, weight=weight))
             if ev is not None:
@@ -463,8 +467,9 @@ def _report_html(rep: GraphReport, title: str | None) -> str:
         pal = list(th.categorical)
         pr = rep.centrality.get("pagerank") or rep.centrality.get("degree") or {}
         rows = []
+        rank = {v: i for i, v in enumerate(rep.graph)}  # ties follow graph order, not set order
         for i, com in enumerate(rep.communities[:12]):
-            members = sorted(com, key=lambda x: -float(pr.get(x, 0)))[:8]
+            members = sorted(com, key=lambda x: (-float(pr.get(x, 0)), rank.get(x, 0)))[:8]
             color = pal[i] if i < 7 or len(rep.communities) <= 8 else th.other
             rows.append(
                 f'<tr><td><span class="sw" style="background:{color}"></span>{i}</td><td class="num">{len(com):,}</td>'

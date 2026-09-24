@@ -212,6 +212,32 @@ def test_save_formats(tmp_path):
         fig.save(tmp_path / "g.bmp")
 
 
+def test_cairosvg_without_the_cairo_library_falls_back(monkeypatch):
+    import builtins
+
+    from aryagraph.render import export
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "cairosvg":
+            raise OSError('no library called "cairo-2" was found')
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    assert export._cairosvg() is None
+    monkeypatch.setattr(export, "find_browser", lambda: None)
+    with pytest.raises(ag.DependencyError, match=r"\(pip install cairosvg\)"):
+        export.svg_to_png("<svg xmlns='http://www.w3.org/2000/svg'/>", "unused.png", 10, 10)
+
+
+def test_tooltip_rejects_callables_with_a_clear_message():
+    g, pos = _tri()
+    assert build_scene(g, layout=pos, tooltip=["x"]).nodes
+    with pytest.raises(TypeError, match="tooltip takes an attribute name"):
+        build_scene(g, layout=pos, tooltip=lambda n: n)
+
+
 def test_themes_change_colors():
     g, pos = _tri()
     light = draw(g, layout=pos, theme="light").scene

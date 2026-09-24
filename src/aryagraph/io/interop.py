@@ -20,7 +20,8 @@
 
 networkx, pandas and scipy are optional: they are imported only when one of
 these functions runs, and a missing package raises :class:`DependencyError`
-(``pip install 'aryagraph[interop]'``). numpy is a core dependency.
+(``pip install networkx``, or ``pip install ".[interop]"`` from a source
+checkout). numpy is a core dependency.
 
 Matrix conventions follow networkx's ``to_numpy_array``: rows and columns
 follow graph order (or *nodes*), an edge without the *weight* attribute

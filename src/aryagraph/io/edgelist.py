@@ -316,6 +316,9 @@ def read_edgelist(
         keeps everything as text), or a mapping from column name/index to a
         callable (other columns stay automatic).
 
+    Notes
+    -----
+
     A line whose target field is empty or missing declares an isolated node
     (this is how :func:`write_edgelist` stores isolates). Repeated edges merge
     their attributes, later lines winning.

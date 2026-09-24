@@ -438,8 +438,10 @@ def resolve_number(
 ) -> NumberResult:
     """Pixel sizes/widths. Constants pass through; data are scaled into *range_*.
 
-    With *area* (node sizes) values map to marker **area**, so a node with twice
-    the value looks twice as big rather than four times.
+    With *area* (node sizes), values are scaled linearly to marker **area**
+    between the smallest and the largest size, so the diameter grows with the
+    square root. The smallest value gets the smallest size rather than zero,
+    so a value twice as large does not get exactly twice the area.
     """
     n = len(keys)
     opts = spec if isinstance(spec, By) else By(spec)

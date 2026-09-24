@@ -138,6 +138,26 @@ def test_report_never_fails_on_odd_graphs():
         rep.to_html()
 
 
+def test_subgraph_of_a_set_follows_graph_order():
+    g = ag.Graph([("e", "d"), ("d", "c"), ("c", "b"), ("b", "a")])
+    assert list(g.subgraph({"a", "c", "e"})) == ["e", "c", "a"]
+    assert list(g.subgraph(frozenset({"b", "d"}))) == ["d", "b"]
+    assert list(g.subgraph(["a", "c", "e"])) == ["a", "c", "e"]  # a sequence keeps its own order
+
+
+def test_report_notes_every_measure_skipped_for_size():
+    rep = ag.analyze(ag.gen.empty_graph(3100), communities=False)
+    assert "algebraic connectivity skipped: 3,100 nodes (> 1,500)" in rep.notes
+    assert "closeness skipped: 3,100 nodes (> 3,000)" in rep.notes
+    assert "closeness" not in rep.centrality
+
+
+def test_report_lists_tied_community_members_in_graph_order():
+    g = ag.Graph([("d", "c"), ("d", "b"), ("d", "a"), ("c", "b"), ("c", "a"), ("b", "a")])  # K4: one community, all tied
+    html = ag.analyze(g).to_html()
+    assert "d, c, b, a" in html
+
+
 def test_cli_roundtrip(tmp_path, capsys):
     src = tmp_path / "campus.json"
     ag.write(ag.gen.ucalgary_campus(), src)

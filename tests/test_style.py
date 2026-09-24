@@ -100,6 +100,14 @@ def test_colormap_reverse_and_unknown():
         P.colormap("rainbow")
 
 
+@pytest.mark.parametrize("mode", ["light", "dark"])
+def test_gray_colormap_stays_neutral(mode):
+    cmap = P.colormap("gray", mode)
+    assert all(C.to_oklch(c)[1] < 0.04 for c in cmap.sample(9))
+    Ls = [C.to_oklch(c)[0] for c in cmap.sample(9)]
+    assert Ls == sorted(Ls, reverse=(mode == "light"))
+
+
 def test_categorical_palette_is_the_validated_one():
     assert LIGHT.categorical[:3] == ("#2a78d6", "#eb6834", "#1baf7a")
     assert len(DARK.categorical) == 8

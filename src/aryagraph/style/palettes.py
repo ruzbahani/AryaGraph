@@ -19,10 +19,13 @@
 """Palettes: categorical, sequential, diverging and status colors.
 
 The default categorical palette is an eight-slot set whose *order* was
-validated for color-vision deficiency: every adjacent pair stays ≥ 8 ΔE apart
-under simulated protanopia/deuteranopia/tritanopia, in light and dark mode. The
-order is the safety mechanism: slots are assigned in order and never cycled;
-a ninth category folds into "Other".
+validated for color-vision deficiency. Measured as OKLab distance × 100 with
+the Machado, Oliveira and Fernandes (2009) simulation at full severity, the
+closest pair of neighboring slots is 9.1 apart under protanopia or
+deuteranopia in light mode and 8.4 in dark mode; for normal vision it is 19.6
+and 19.3. Under the rarer tritanopia, light-mode yellow and magenta come
+closest, at 5.8. The order is the safety mechanism: slots are assigned in
+order and never cycled; a ninth category folds into "Other".
 """
 
 from __future__ import annotations
@@ -86,12 +89,17 @@ BLUE_RAMP: dict[int, str] = {
 
 
 def hue_ramp(color: str) -> dict[int, str]:
-    """A 100–700 ramp in *color*'s hue with the lightness/chroma profile of the blue ramp."""
-    _, _, hue = to_oklch(color)
+    """A 100–700 ramp in *color*'s hue with the lightness/chroma profile of the blue ramp.
+
+    A near-neutral *color* (OKLCH chroma below 0.04, such as a gray) keeps its
+    own low chroma at every step, so its ramp stays gray.
+    """
+    _, chroma, hue = to_oklch(color)
+    neutral = chroma < 0.04
     out = {}
     for step, ref in BLUE_RAMP.items():
         L, C, _ = to_oklch(ref)
-        out[step] = from_oklch(L, C, hue)
+        out[step] = from_oklch(L, chroma if neutral else C, hue)
     return out
 
 

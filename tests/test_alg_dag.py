@@ -22,7 +22,11 @@ from __future__ import annotations
 
 import itertools
 import math
+import os
 import random
+import subprocess
+import sys
+from pathlib import Path
 
 import networkx as nx
 import pytest
@@ -108,6 +112,29 @@ def test_topological_sort_errors():
     assert D.topological_sort(DAG()) == []
     with pytest.raises(CycleError):
         D.topological_sort(DiGraph([(0, 0)]))
+
+
+def test_reported_cycle_does_not_depend_on_the_hash_seed():
+    # Kahn's leftovers are traced from the first one in graph order, so string
+    # nodes give the same cycle (and message) in every process.
+    code = (
+        "import aryagraph as ag\n"
+        "try:\n"
+        "    ag.DAG([('x', 'y'), ('y', 'z'), ('z', 'x'), ('z', 'w')])\n"
+        "except ag.CycleError as err:\n"
+        "    print(err.cycle)\n"
+        "try:\n"
+        "    ag.alg.topological_sort(ag.DiGraph([('b', 'a'), ('a', 'b')]))\n"
+        "except ag.CycleError as err:\n"
+        "    print(err.cycle)\n"
+    )
+    outputs = set()
+    for hash_seed in ("0", "1", "2", "3"):
+        src = str(Path(__file__).resolve().parents[1] / "src")
+        env = dict(os.environ, PYTHONHASHSEED=hash_seed, PYTHONPATH=os.pathsep.join(filter(None, [src, os.environ.get("PYTHONPATH")])))
+        done = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, check=True)
+        outputs.add(done.stdout)
+    assert outputs == {"['x', 'y', 'z', 'x']\n['b', 'a', 'b']\n"}
 
 
 @pytest.mark.parametrize("seed", SEEDS)

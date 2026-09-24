@@ -114,9 +114,9 @@ class DependencyError(AryaGraphError, ImportError):
     """An optional dependency needed for this feature is not installed."""
 
     def __init__(self, package: str, feature: str, extra: str | None = None) -> None:
-        hint = f"pip install {package}" if extra is None else f"pip install 'aryagraph[{extra}]'"
-        super().__init__(f"{feature} requires the optional package {package!r} ({hint})")
+        super().__init__(f"{feature} requires the optional package {package!r} (pip install {package})")
         self.package = package
+        self.extra = extra
 
 
 __all__ = [

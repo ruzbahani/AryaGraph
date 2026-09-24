@@ -276,9 +276,10 @@ def test_missing_optional_dependency_raises_dependency_error(monkeypatch, call, 
         return real(name, *args, **kwargs)
 
     monkeypatch.setattr(interop.importlib, "import_module", fake_import)
-    with pytest.raises(DependencyError, match=r"aryagraph\[interop\]") as info:
+    with pytest.raises(DependencyError, match=rf"\(pip install {package}\)") as info:
         call()
     assert info.value.package == package and isinstance(info.value, ImportError)
+    assert info.value.extra == "interop"
 
 
 def test_numpy_bridges_need_no_optional_packages(monkeypatch):

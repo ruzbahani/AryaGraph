@@ -407,7 +407,7 @@ def critical_path(
     missing); an arc ``u → v`` means v cannot start before u finishes. A
     forward pass gives earliest start/finish, a backward pass from the
     makespan gives latest start/finish, and slack is their difference.
-    Activities with |slack| ≤ 1e-9·max(1, makespan) count as critical (their
+    Activities whose absolute slack is ≤ 1e-9·max(1, makespan) count as critical (their
     slack is reported as exactly 0). O(n + m).
 
     >>> dag = DAG([("design", "build"), ("design", "docs"), ("build", "ship"), ("docs", "ship")])

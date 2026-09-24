@@ -88,6 +88,15 @@ HEADLESS_FLAGS = (
 )
 
 
+def _cairosvg():
+    """The cairosvg module, or None when it (or the Cairo library it loads) is unavailable."""
+    try:
+        import cairosvg  # type: ignore
+    except (ImportError, OSError):  # OSError: cairosvg is installed but the Cairo C library is not
+        return None
+    return cairosvg
+
+
 def _run_browser(args: list[str], timeout: float = 120) -> None:
     kwargs = {}
     if sys.platform == "win32":
@@ -97,20 +106,17 @@ def _run_browser(args: list[str], timeout: float = 120) -> None:
     except subprocess.TimeoutExpired:
         raise RuntimeError(
             f"the headless browser did not finish within {timeout:g} s; "
-            "install cairosvg (pip install 'aryagraph[png]') for browser-free export"
+            "install cairosvg (pip install cairosvg) for browser-free export"
         ) from None
 
 
 def svg_to_png(svg: str, path: str | Path, width: float, height: float, scale: float = 2.0) -> Path:
     """Rasterise *svg* to *path* at *scale* × its CSS pixel size."""
     path = Path(path)
-    try:
-        import cairosvg  # type: ignore
-
+    cairosvg = _cairosvg()
+    if cairosvg is not None:
         cairosvg.svg2png(bytestring=svg.encode("utf-8"), write_to=str(path), scale=scale)
         return path
-    except ImportError:
-        pass
     browser = find_browser()
     if browser is None:
         raise DependencyError("cairosvg", "PNG export (or install Chrome/Edge/Chromium)", extra="png")
@@ -137,13 +143,10 @@ def svg_to_png(svg: str, path: str | Path, width: float, height: float, scale: f
 def svg_to_pdf(svg: str, path: str | Path, width: float, height: float) -> Path:
     """Vector PDF of *svg* at its natural size."""
     path = Path(path)
-    try:
-        import cairosvg  # type: ignore
-
+    cairosvg = _cairosvg()
+    if cairosvg is not None:
         cairosvg.svg2pdf(bytestring=svg.encode("utf-8"), write_to=str(path))
         return path
-    except ImportError:
-        pass
     browser = find_browser()
     if browser is None:
         raise DependencyError("cairosvg", "PDF export (or install Chrome/Edge/Chromium)", extra="png")

@@ -175,7 +175,9 @@ def compute(
     components:
         ``"pack"`` (default): stress, force, forceatlas2 and spectral lay out
         each weakly connected component separately and pack the pieces with a
-        gap of one typical edge length. ``None`` lays out the whole graph at once.
+        gap of one typical edge length. ``None`` lays out the whole graph at
+        once with the force-directed engines; stress and spectral need
+        connected input, so they pack components in either case.
     **kwargs:
         Engine options. With ``"auto"``, options the chosen engine does not
         accept are ignored (so e.g. ``orientation`` is harmless for a cyclic graph).

@@ -90,3 +90,9 @@ def test_chart_save_html(tmp_path):
     assert "ag-chart-data" in html and "pointermove" in html
     with pytest.raises(ValueError):
         ch.save(tmp_path / "c.xyz")
+
+
+def test_chart_save_creates_missing_folders(tmp_path):
+    ch = line_chart([0, 1], {"a": [0, 1]})
+    out = ch.save(tmp_path / "new" / "deeper" / "c.svg")
+    assert out.exists() and out.read_text(encoding="utf-8").startswith("<?xml")

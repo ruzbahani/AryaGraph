@@ -51,6 +51,9 @@ def spectral(g: Any, *, weight: WeightSpec = None, normalized: bool = True, seed
         Use the generalized problem ``L u = λ D u`` (degree-normalised
         eigenvectors) instead of the combinatorial Laplacian.
 
+    Notes
+    -----
+
     Graphs with fewer than three nodes, no edges, or a degenerate spectrum
     (e.g. complete graphs, where the eigenvectors are arbitrary) fall back to
     :func:`circular`; disconnected graphs are laid out per component and

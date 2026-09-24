@@ -96,8 +96,11 @@ class Chart:
         return chart_page(self, title or self.meta.get("title") or self.kind)
 
     def save(self, path: str | Path, scale: float = 2.0) -> Path:
+        """Write to *path*; the format follows the extension (.svg, .html, .png, .pdf)."""
         path = Path(path)
         ext = path.suffix.lower()
+        if path.parent and not path.parent.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
         if ext == ".svg":
             path.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + self.svg, encoding="utf-8")
         elif ext in (".html", ".htm"):

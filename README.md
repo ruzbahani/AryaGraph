@@ -30,7 +30,7 @@ It provides:
 - simulation engines for epidemics, cascades, opinion dynamics and project schedules, with animated playback;
 - one-call analytical reports and interactive dashboards.
 
-The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,448 tests and runs on Python 3.10 to 3.13.
+The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,457 tests and runs on Python 3.10 to 3.13.
 
 <p align="center">
   <img src="docs/gallery/campus.png" width="49%" alt="University of Calgary campus buildings colored by kind, with the shortest walking route highlighted">
@@ -139,7 +139,7 @@ dag.add_edge("report", "extract")
 - a sequence;
 - an `ag.by(...)` spec for full control.
 
-Channels are `node_color`, `node_size`, `node_shape`, `node_opacity`, `labels`, `edge_color`, `edge_width`, `edge_label` and `tooltip`.
+Channels are `node_color`, `node_size`, `node_shape`, `node_opacity`, `labels`, `edge_color`, `edge_width` and `edge_label`. `tooltip` selects which node attributes the tooltips list: one name, a list of names, or `False`.
 
 - **Scales chosen from the data.**
   - Categories use a fixed-order palette validated for color-vision deficiency. With more than eight categories, the seven most frequent keep their colors and the rest fold into "Other".
@@ -185,7 +185,7 @@ Several figures can share one page.
 
 In addition:
 - Disconnected graphs are laid out per component and packed.
-- When drawn, force-directed and stress layouts of up to 3,000 nodes get pixel-space overlap removal.
+- When drawn, layouts in abstract units (force-directed, stress, geometric, and coordinates you supply) of up to 3,000 nodes get pixel-space overlap removal; `avoid_overlap=False` keeps positions exactly as given.
 - Any `{node: (x, y)}` mapping, for example real coordinates, can serve as a layout.
 
 <p align="center">

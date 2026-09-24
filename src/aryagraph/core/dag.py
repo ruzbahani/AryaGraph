@@ -55,12 +55,17 @@ def _kahn(g: Graph) -> tuple[list[Node], list[Node] | None]:
                 queue.append(v)
     if len(order) == len(indeg):
         return order, None
-    remaining = {n for n, k in indeg.items() if k > 0}
+    remaining = dict.fromkeys(n for n, k in indeg.items() if k > 0)  # graph order, O(1) lookups
     return order, _cycle_in(pred, remaining)
 
 
-def _cycle_in(pred: dict, remaining: set) -> list[Node]:
-    """A directed cycle inside *remaining*, where every node keeps a predecessor in the set."""
+def _cycle_in(pred: dict, remaining: dict) -> list[Node]:
+    """A directed cycle inside *remaining*, where every node keeps a predecessor in it.
+
+    The walk starts at the first remaining node in graph order and follows
+    predecessors in insertion order, so the reported cycle is the same in
+    every process.
+    """
     cur = next(iter(remaining))
     path: list[Node] = []
     index: dict[Node, int] = {}

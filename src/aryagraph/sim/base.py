@@ -124,6 +124,9 @@ class SimulationResult:
         Model-specific extras. Continuous results always carry
         ``meta["domain"] = (lo, hi)`` and ``meta["diverging"]`` (bool).
 
+    Notes
+    -----
+
     A frame holds the state *after* every event with time ≤ its time, so
     :meth:`at` is exact between frames for jump processes.
     """

@@ -178,7 +178,9 @@ def project_plan() -> DAG:
 
     Durations are working hours (40 h = one week). Arcs carry ``lag``, a
     mandatory wait in hours after the predecessor finishes (concrete curing,
-    drywall mud drying); it is 0 elsewhere.
+    drywall mud drying); it is 0 elsewhere. :func:`critical_path` and the
+    schedulers read node durations only, so to include a lag, insert it as a
+    task of its own on that arc.
     """
     tasks = [
         ("site survey", 16.0, 12.0, 24.0, "planning", "surveyor"),

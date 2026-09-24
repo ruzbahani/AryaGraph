@@ -387,8 +387,15 @@ class Graph:
         return g
 
     def subgraph(self, nodes: Iterable[Node]):
-        """Induced subgraph on *nodes* (a new graph; attributes are copied)."""
-        keep = [n for n in dict.fromkeys(nodes) if n in self]
+        """Induced subgraph on *nodes* (a new graph; attributes are copied).
+
+        The subgraph lists its nodes in the order *nodes* gives them. A set has
+        no order of its own, so a set (or frozenset) keeps the graph's order.
+        """
+        if isinstance(nodes, (set, frozenset)):
+            keep = [n for n in self._node if n in nodes]
+        else:
+            keep = [n for n in dict.fromkeys(nodes) if n in self]
         keep_set = set(keep)
         g = self._empty_like()
         g.add_nodes((n, dict(self._node[n])) for n in keep)

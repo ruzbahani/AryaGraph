@@ -131,10 +131,16 @@ def to_mermaid(
     edge_label:
         Edge attribute shown on the link (``None`` for no link text).
 
+    Notes
+    -----
+
     A node's ``shape`` attribute (``rect``, ``round``, ``stadium``,
     ``circle``, ``diamond``, ``hexagon``, …) picks its brackets; an edge's
     ``style`` (``"dotted"``/``"thick"``) and ``arrow`` (``"none"``,
     ``"normal"``, ``"circle"``, ``"cross"``) pick the link.
+
+    Examples
+    --------
 
     >>> print(to_mermaid(DiGraph([("start", "end")])), end="")
     flowchart TD

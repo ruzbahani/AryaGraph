@@ -589,6 +589,8 @@ class SceneBuilder:
             keys = []
         elif isinstance(spec, str):
             keys = [spec]
+        elif callable(spec) or isinstance(spec, Mapping) or not isinstance(spec, Iterable):
+            raise TypeError(f"tooltip takes an attribute name, a list of names, True or False, not {spec!r}")
         else:
             keys = list(spec)
         info["attrs"] = {str(k): _jsonable(attrs.get(k)) for k in keys if k in attrs}

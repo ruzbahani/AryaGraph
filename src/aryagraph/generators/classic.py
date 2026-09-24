@@ -166,13 +166,16 @@ def grid_graph(
     Parameters
     ----------
     periodic:
-        Wrap around in both dimensions (a torus), or give ``(rows_wrap,
-        cols_wrap)``. As in networkx, a dimension of length ≤ 2 never wraps
+        Wrap around in both dimensions (a torus), or give
+        ``(rows_wrap, cols_wrap)``. As in networkx, a dimension of length ≤ 2 never wraps
         (the wrap edge would duplicate an existing one).
     directed:
         Arcs point to increasing row / column (wrap arcs go from the last
         row/column to the first). networkx instead adds both directions; use
         ``grid_graph(...).to_directed()`` for that.
+
+    Notes
+    -----
 
     Matches ``networkx.grid_2d_graph(rows, cols, periodic)`` when undirected.
     """

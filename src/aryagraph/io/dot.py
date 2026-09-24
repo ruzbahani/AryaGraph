@@ -574,10 +574,16 @@ def to_dot(
     rankdir:
         Graphviz layout direction (``"TB"``, ``"LR"``, …), written as a graph attribute.
 
+    Notes
+    -----
+
     Nodes with a ``cluster`` attribute are grouped into ``subgraph cluster_…``
     blocks (with the attributes in ``g.attrs["clusters"]``), which is exactly
     what :func:`from_dot` produces, so clusters round-trip. Scalar graph
     attributes are written in a ``graph [...]`` statement.
+
+    Examples
+    --------
 
     >>> print(to_dot(DiGraph([("a", "b b")])), end="")
     digraph {
