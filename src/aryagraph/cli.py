@@ -168,7 +168,23 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _utf8_output() -> None:
+    """Write UTF-8 when output goes to a file or pipe with another encoding.
+
+    On Windows that encoding is the ANSI code page (for example cp1252), which
+    cannot hold the report's box-drawing rule or non-Latin labels.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        encoding = (getattr(stream, "encoding", None) or "").lower().replace("-", "").replace("_", "")
+        if encoding != "utf8" and hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8")
+            except (OSError, ValueError):
+                pass
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    _utf8_output()
     args = build_parser().parse_args(argv)
     try:
         return int(args.func(args) or 0)

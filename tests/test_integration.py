@@ -171,6 +171,19 @@ def test_cli_roundtrip(tmp_path, capsys):
     assert "error" in capsys.readouterr().err
 
 
+def test_cli_report_survives_a_narrow_output_encoding(tmp_path):
+    # Redirected output on Windows uses the ANSI code page; the report's rule does not fit in it.
+    src = tmp_path / "campus.json"
+    ag.write(ag.gen.ucalgary_campus(), src)
+    env = dict(__import__("os").environ, PYTHONIOENCODING="cp1252")
+    root = Path(__file__).resolve().parents[1]
+    env["PYTHONPATH"] = __import__("os").pathsep.join(filter(None, [str(root / "src"), env.get("PYTHONPATH")]))
+    done = subprocess.run([__import__("sys").executable, "-m", "aryagraph", "analyze", str(src)], env=env, capture_output=True)
+    assert done.returncode == 0, done.stderr.decode("utf-8", "replace")
+    text = done.stdout.decode("utf-8")
+    assert "\u2500" in text and "Communities" in text
+
+
 @pytest.mark.skipif(find_browser() is None, reason="needs a Chromium-family browser")
 def test_interactive_runtime_boots_in_a_real_browser(tmp_path):
     g = ag.gen.ucalgary_campus()

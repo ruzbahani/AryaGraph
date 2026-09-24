@@ -113,8 +113,8 @@ class ConvergenceError(AryaGraphError, RuntimeError):
 class DependencyError(AryaGraphError, ImportError):
     """An optional dependency needed for this feature is not installed."""
 
-    def __init__(self, package: str, feature: str, extra: str | None = None) -> None:
-        super().__init__(f"{feature} requires the optional package {package!r} (pip install {package})")
+    def __init__(self, package: str, feature: str, extra: str | None = None, hint: str | None = None) -> None:
+        super().__init__(f"{feature} requires the optional package {package!r} ({hint or f'pip install {package}'})")
         self.package = package
         self.extra = extra
 

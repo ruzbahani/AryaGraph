@@ -103,6 +103,18 @@ def _cairosvg():
     return cairosvg
 
 
+def _no_converter(feature: str) -> DependencyError:
+    """The error for a PNG/PDF export that has neither a usable cairosvg nor a browser."""
+    try:
+        import cairosvg  # type: ignore  # noqa: F401
+    except OSError as exc:  # cairosvg is installed but the Cairo C library is not
+        hint = f"it is installed but cannot load the Cairo library: {exc}; install Cairo for your system"
+        return DependencyError("cairosvg", feature, extra="png", hint=hint)
+    except ImportError:
+        pass
+    return DependencyError("cairosvg", feature, extra="png")
+
+
 def _run_browser(args: list[str], timeout: float = 120) -> None:
     kwargs = {}
     if sys.platform == "win32":
@@ -125,7 +137,7 @@ def svg_to_png(svg: str, path: str | Path, width: float, height: float, scale: f
         return path
     browser = find_browser()
     if browser is None:
-        raise DependencyError("cairosvg", "PNG export (or install Chrome/Edge/Chromium)", extra="png")
+        raise _no_converter("PNG export (or install Chrome/Edge/Chromium)")
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "figure.html"
         page.write_text(_page(svg, width, height), encoding="utf-8")
@@ -155,7 +167,7 @@ def svg_to_pdf(svg: str, path: str | Path, width: float, height: float) -> Path:
         return path
     browser = find_browser()
     if browser is None:
-        raise DependencyError("cairosvg", "PDF export (or install Chrome/Edge/Chromium)", extra="png")
+        raise _no_converter("PDF export (or install Chrome/Edge/Chromium)")
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "figure.html"
         found = _SVG_TITLE.match(svg)

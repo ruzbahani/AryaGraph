@@ -228,8 +228,27 @@ def test_cairosvg_without_the_cairo_library_falls_back(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", fake_import)
     assert export._cairosvg() is None
     monkeypatch.setattr(export, "find_browser", lambda: None)
-    with pytest.raises(ag.DependencyError, match=r"\(pip install cairosvg\)"):
+    # with no browser either, the error names the real cause, not "pip install cairosvg"
+    with pytest.raises(ag.DependencyError, match=r"cannot load the Cairo library: no library called \"cairo-2\""):
         export.svg_to_png("<svg xmlns='http://www.w3.org/2000/svg'/>", "unused.png", 10, 10)
+
+
+def test_missing_cairosvg_and_browser_suggest_pip(monkeypatch):
+    import builtins
+
+    from aryagraph.render import export
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "cairosvg":
+            raise ImportError(name)
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr(export, "find_browser", lambda: None)
+    with pytest.raises(ag.DependencyError, match=r"\(pip install cairosvg\)"):
+        export.svg_to_pdf("<svg xmlns='http://www.w3.org/2000/svg'/>", "unused.pdf", 10, 10)
 
 
 def test_browser_pdf_takes_the_figure_title(monkeypatch, tmp_path):
