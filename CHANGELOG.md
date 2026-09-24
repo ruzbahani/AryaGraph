@@ -17,7 +17,6 @@ All notable changes to AryaGraph are recorded here. The project follows [Semanti
 
 ### Documentation
 
-- The project website: user guide, tutorials, case studies, gallery, API reference and project pages.
 - Precise docstrings for the categorical palette, `layout.compute(components=None)`, node-size scaling and `project_plan()` lags.
 
 ## 0.1.0 · Initial release (2026-09-23)
