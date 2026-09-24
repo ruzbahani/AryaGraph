@@ -1,0 +1,7 @@
+# Tools to build the AryaGraph website (https://ruzbahani.com/aryagraph).
+# Install with:  pip install -r website/requirements.txt  (plus AryaGraph itself: pip install -e .)
+sphinx>=8,<10
+pydata-sphinx-theme>=0.16,<0.22
+myst-parser>=4,<6
+sphinx-design>=0.6,<0.8
+sphinx-copybutton>=0.5,<0.6

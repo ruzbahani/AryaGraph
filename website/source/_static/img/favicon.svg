@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="330" viewBox="0 0 300 330" role="img" aria-label="AryaGraph">
+  <title>AryaGraph</title>
+  <g stroke-linecap="round" stroke-width="16">
+    <line x1="150" y1="44" x2="84" y2="170" stroke="#152b4d"/>
+    <line x1="150" y1="44" x2="220" y2="172" stroke="#1450e0"/>
+    <line x1="84" y1="170" x2="220" y2="172" stroke="#152b4d"/>
+    <line x1="84" y1="170" x2="44" y2="286" stroke="#152b4d"/>
+    <line x1="220" y1="172" x2="258" y2="286" stroke="#1450e0"/>
+  </g>
+  <ellipse cx="150" cy="44" rx="30" ry="34" fill="#0aa6a0"/>
+  <ellipse cx="84" cy="170" rx="30" ry="34" fill="#152b4d"/>
+  <ellipse cx="220" cy="172" rx="30" ry="34" fill="#1450e0"/>
+  <ellipse cx="44" cy="286" rx="30" ry="34" fill="#0aa6a0"/>
+  <ellipse cx="258" cy="286" rx="30" ry="34" fill="#152b4d"/>
+</svg>
