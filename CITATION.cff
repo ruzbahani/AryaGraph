@@ -18,6 +18,9 @@ identifiers:
   - type: doi
     value: "10.5281/zenodo.22928895"
     description: "DOI of AryaGraph v0.1.0."
+  - type: doi
+    value: "10.5281/zenodo.22946037"
+    description: "DOI of AryaGraph v0.1.1."
 keywords:
   - graph
   - network analysis
