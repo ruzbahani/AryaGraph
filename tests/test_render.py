@@ -17,6 +17,7 @@
 # =============================================================================
 
 import math
+from pathlib import Path
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -229,6 +230,31 @@ def test_cairosvg_without_the_cairo_library_falls_back(monkeypatch):
     monkeypatch.setattr(export, "find_browser", lambda: None)
     with pytest.raises(ag.DependencyError, match=r"\(pip install cairosvg\)"):
         export.svg_to_png("<svg xmlns='http://www.w3.org/2000/svg'/>", "unused.png", 10, 10)
+
+
+def test_browser_pdf_takes_the_figure_title(monkeypatch, tmp_path):
+    from urllib.parse import unquote, urlparse
+
+    from aryagraph.render import export
+
+    titles = []
+
+    def fake_browser(args, timeout=120):
+        page = Path(unquote(urlparse(args[-1]).path.lstrip("/")))
+        if not page.exists():  # POSIX paths keep their leading slash
+            page = Path(unquote(urlparse(args[-1]).path))
+        text = page.read_text(encoding="utf-8")
+        titles.append(text[text.index("<title>") + 7 : text.index("</title>")])
+        out = next(a for a in args if a.startswith("--print-to-pdf="))
+        Path(out.split("=", 1)[1]).write_bytes(b"%PDF-1.4\n")
+
+    monkeypatch.setattr(export, "_cairosvg", lambda: None)
+    monkeypatch.setattr(export, "find_browser", lambda: "browser")
+    monkeypatch.setattr(export, "_run_browser", fake_browser)
+    g, pos = _tri()
+    draw(g, layout=pos, title="Caf\u00e9 & friends").save(tmp_path / "titled.pdf")
+    export.svg_to_pdf("<svg xmlns='http://www.w3.org/2000/svg'/>", tmp_path / "plain-name.pdf", 10, 10)
+    assert titles == ["Caf\u00e9 &amp; friends", "plain-name"]
 
 
 def test_tooltip_rejects_callables_with_a_clear_message():

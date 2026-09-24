@@ -26,7 +26,9 @@ exactly as the interactive view does.
 
 from __future__ import annotations
 
+import html
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -64,9 +66,13 @@ def find_browser() -> str | None:
     return None
 
 
-def _page(svg: str, width: float, height: float) -> str:
+# The <title> that opens an SVG document written by AryaGraph (the figure's title).
+_SVG_TITLE = re.compile(r"^\s*(?:<\?xml[^>]*>\s*)?<svg\b[^>]*>\s*<title\b[^>]*>(.*?)</title>", re.DOTALL)
+
+
+def _page(svg: str, width: float, height: float, title: str = "") -> str:
     return (
-        "<!doctype html><html><head><meta charset='utf-8'><style>"
+        f"<!doctype html><html><head><meta charset='utf-8'><title>{html.escape(title)}</title><style>"
         f"@page{{size:{width}px {height}px;margin:0}}html,body{{margin:0;padding:0;background:transparent}}"
         "svg{display:block}</style></head><body>" + svg + "</body></html>"
     )
@@ -152,7 +158,10 @@ def svg_to_pdf(svg: str, path: str | Path, width: float, height: float) -> Path:
         raise DependencyError("cairosvg", "PDF export (or install Chrome/Edge/Chromium)", extra="png")
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "figure.html"
-        page.write_text(_page(svg, width, height), encoding="utf-8")
+        found = _SVG_TITLE.match(svg)
+        title = html.unescape(found.group(1)).strip() if found else ""
+        # the browser uses the page title as the PDF's document title
+        page.write_text(_page(svg, width, height, title or path.stem), encoding="utf-8")
         _run_browser(
             [
                 browser,

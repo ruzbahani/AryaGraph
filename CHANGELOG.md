@@ -14,6 +14,7 @@ All notable changes to AryaGraph are recorded here. The project follows [Semanti
 - `Chart.save()` creates missing folders, like `Figure.save()`.
 - `analyze()` adds a note when it skips closeness (above 3,000 nodes) or algebraic connectivity (above 1,500 nodes), and its dashboard breaks ties between community members in graph order.
 - `draw(tooltip=...)` names the accepted values when given a callable or a mapping.
+- PDFs exported through a headless browser carry the figure's title (or the file name) as their document title, instead of "figure.html".
 
 ### Documentation
 
