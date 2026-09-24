@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/ruzbahani/AryaGraph/actions/workflows/tests.yml"><img alt="tests" src="https://github.com/ruzbahani/AryaGraph/actions/workflows/tests.yml/badge.svg"></a>
-  <img alt="version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-2a78d6">
+  <img alt="version 0.1.1" src="https://img.shields.io/badge/version-0.1.1-2a78d6">
   <img alt="python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-2a78d6">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-1baf7a">
   <a href="https://doi.org/10.5281/zenodo.22928604"><img alt="DOI 10.5281/zenodo.22928604" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22928604.svg"></a>
@@ -17,8 +17,8 @@ AryaGraph is a Python package for graph and DAG visualization, analysis and simu
 - **Author:** Ali Mohammadi Ruzbahani
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
-- **Citing:** [doi.org/10.5281/zenodo.22928604](https://doi.org/10.5281/zenodo.22928604) (all versions; v0.1.0 is
-  [10.5281/zenodo.22928895](https://doi.org/10.5281/zenodo.22928895)); see also [CITATION.cff](CITATION.cff)
+- **Citing:** [doi.org/10.5281/zenodo.22928604](https://doi.org/10.5281/zenodo.22928604) (all versions, resolving
+  to the latest; the Zenodo page lists the DOI of each release); see also [CITATION.cff](CITATION.cff)
 - **License:** [MIT](LICENSE)
 
 It provides:
@@ -30,7 +30,7 @@ It provides:
 - simulation engines for epidemics, cascades, opinion dynamics and project schedules, with animated playback;
 - one-call analytical reports and interactive dashboards.
 
-The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,458 tests and runs on Python 3.10 to 3.13.
+The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,460 tests and runs on Python 3.10 to 3.13.
 
 <p align="center">
   <img src="docs/gallery/campus.png" width="49%" alt="University of Calgary campus buildings colored by kind, with the shortest walking route highlighted">
@@ -81,7 +81,7 @@ pip install ".[png]"           # cairosvg for PNG/PDF export without a browser
 pip install -e ".[test]"       # development install; then run: python -m pytest
 ```
 
-Requirements: Python 3.10 or newer. PNG/PDF export uses `cairosvg` when installed, otherwise any Chrome, Edge or Chromium found on the system.
+Requirements: Python 3.10 or newer. PNG/PDF export uses `cairosvg` when it is installed and can load the Cairo library, otherwise any Chrome, Edge or Chromium found on the system.
 
 ## Quick start
 

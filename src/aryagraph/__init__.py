@@ -36,7 +36,7 @@ Namespaces
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from . import algorithms, analysis, charts, generators, io, layout, render, sim, style
 from . import algorithms as alg
