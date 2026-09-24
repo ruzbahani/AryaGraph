@@ -1,0 +1,89 @@
+# =============================================================================
+#
+#      _                     ____                 _
+#     / \   _ __ _   _  __ _ / ___|_ __ __ _ _ __ | |__
+#    / _ \ | '__| | | |/ _` | |  _| '__/ _` | '_ \| '_ \
+#   / ___ \| |  | |_| | (_| | |_| | | | (_| | |_) | | | |
+#  /_/   \_\_|   \__, |\__,_|\____|_|  \__,_| .__/|_| |_|
+#               |___/                     |_|
+#
+#          Graph & DAG visualization, analysis and simulation.
+#
+# -----------------------------------------------------------------------------
+#  Copyright (c) 2026 Ali Mohammadi Ruzbahani
+#  SPDX-License-Identifier: MIT
+#
+#  https://ruzbahani.com/aryagraph
+# =============================================================================
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aryagraph"
+version = "0.1.0"
+description = "AryaGraph: graph & DAG visualization, analysis and simulation for Python."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ali Mohammadi Ruzbahani" }]
+maintainers = [{ name = "Ali Mohammadi Ruzbahani" }]
+keywords = [
+    "graph",
+    "network",
+    "dag",
+    "visualization",
+    "graph-layout",
+    "sugiyama",
+    "network-analysis",
+    "simulation",
+    "epidemic",
+    "scheduling",
+    "svg",
+    "interactive",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = ["numpy>=1.23"]
+
+[project.urls]
+Homepage = "https://ruzbahani.com/aryagraph"
+Documentation = "https://ruzbahani.com/aryagraph"
+Source = "https://github.com/ruzbahani/AryaGraph"
+Issues = "https://github.com/ruzbahani/AryaGraph/issues"
+
+[project.optional-dependencies]
+interop = ["networkx>=3.0", "pandas>=1.5", "scipy>=1.9"]
+png = ["cairosvg>=2.5"]
+test = ["pytest>=7", "networkx>=3.0"]
+
+[project.scripts]
+aryagraph = "aryagraph.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aryagraph = ["render/assets/*", "generators/data/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

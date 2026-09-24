@@ -1,0 +1,124 @@
+/*
+ * =============================================================================
+ *
+ *      _                     ____                 _
+ *     / \   _ __ _   _  __ _ / ___|_ __ __ _ _ __ | |__
+ *    / _ \ | '__| | | |/ _` | |  _| '__/ _` | '_ \| '_ \
+ *   / ___ \| |  | |_| | (_| | |_| | | | (_| | |_) | | | |
+ *  /_/   \_\_|   \__, |\__,_|\____|_|  \__,_| .__/|_| |_|
+ *               |___/                     |_|
+ *
+ *          Graph & DAG visualization, analysis and simulation.
+ *
+ * -----------------------------------------------------------------------------
+ *  Copyright (c) 2026 Ali Mohammadi Ruzbahani
+ *  SPDX-License-Identifier: MIT
+ *
+ *  https://ruzbahani.com/aryagraph
+ * =============================================================================
+ */
+
+/* AryaGraph interactive view: all colors come from theme custom properties set on .ag-app */
+.ag-app{font-family:var(--ag-font);color:var(--ag-ink);background:var(--ag-bg);box-sizing:border-box;
+  padding:16px;min-height:100%;-webkit-font-smoothing:antialiased}
+.ag-app *,.ag-app *::before,.ag-app *::after{box-sizing:inherit}
+.ag-shell{max-width:var(--ag-max-w,1200px);margin:0 auto;display:flex;flex-direction:column;gap:10px}
+
+/* toolbar: one row above the content it scopes */
+.ag-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ag-search{position:relative;flex:1 1 220px;max-width:340px}
+.ag-search input{width:100%;height:32px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);
+  color:var(--ag-ink);font:inherit;font-size:13px;padding:0 10px 0 30px;outline:none}
+.ag-search input:focus{border-color:var(--ag-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--ag-accent) 18%,transparent)}
+.ag-search svg{position:absolute;left:9px;top:9px;width:14px;height:14px;stroke:var(--ag-ink-3);fill:none;stroke-width:2}
+.ag-results{position:absolute;top:36px;left:0;right:0;z-index:20;background:var(--ag-surface);border:1px solid var(--ag-border);
+  border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:4px;margin:0;list-style:none;max-height:280px;overflow:auto}
+.ag-results li{padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.ag-results li small{color:var(--ag-ink-3)}
+.ag-results li[aria-selected=true],.ag-results li:hover{background:color-mix(in srgb,var(--ag-ink) 6%,transparent)}
+.ag-spacer{flex:1}
+.ag-btn{height:32px;min-width:32px;padding:0 10px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);
+  color:var(--ag-ink-2);font:inherit;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.ag-btn:hover{color:var(--ag-ink);background:color-mix(in srgb,var(--ag-ink) 5%,var(--ag-surface))}
+.ag-btn[aria-pressed=true]{color:var(--ag-ink);border-color:color-mix(in srgb,var(--ag-ink) 30%,transparent)}
+.ag-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ag-btn:focus-visible,.ag-n:focus-visible{outline:2px solid var(--ag-accent);outline-offset:2px}
+
+/* stage */
+.ag-stage{position:relative;border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);overflow:hidden;
+  height:var(--ag-stage-h,70vh);touch-action:none;user-select:none;-webkit-user-select:none}
+.ag-stage>svg{display:block;width:100%;height:100%;cursor:grab}
+.ag-stage.ag-panning>svg{cursor:grabbing}
+.ag-n{cursor:pointer}
+.ag-stage.ag-dragging .ag-n{cursor:grabbing}
+
+/* neighborhood emphasis: CSS beats the presentation attributes */
+svg.ag-focus .ag-e{opacity:.05;transition:opacity .12s}
+svg.ag-focus .ag-e.ag-on{opacity:.95}
+svg.ag-focus .ag-n{opacity:.16;transition:opacity .12s}
+svg.ag-focus .ag-n.ag-on{opacity:1}
+svg.ag-focus .ag-l{opacity:.12}
+svg.ag-focus .ag-l.ag-on{opacity:1;visibility:visible}
+svg.ag-focus .ag-el{opacity:.1}
+svg.ag-focus .ag-el.ag-on{opacity:1}
+svg .ag-n.ag-sel .ag-shape{stroke:var(--ag-highlight);stroke-width:2.5}
+svg.ag-labels-all .ag-l{visibility:visible}
+svg.ag-labels-none .ag-l{visibility:hidden}
+svg .ag-e.ag-fire{opacity:1 !important}
+svg .ag-e.ag-fire .ag-edge{stroke:var(--ag-fire,#d03b3b);stroke-width:2.2}
+svg .ag-e.ag-fire .ag-arrow{fill:var(--ag-fire,#d03b3b)}
+.ag-legend-item{cursor:pointer}
+
+/* tooltip: value leads, label follows */
+.ag-tip{position:absolute;z-index:30;pointer-events:none;min-width:140px;max-width:300px;background:var(--ag-surface);
+  border:1px solid var(--ag-border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:10px 12px;font-size:12px;line-height:1.35}
+.ag-tip[hidden]{display:none}
+.ag-tip b{display:block;font-size:13px;font-weight:600;color:var(--ag-ink);margin-bottom:6px;word-break:break-word}
+.ag-tip dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0}
+.ag-tip dt{color:var(--ag-ink-3)}
+.ag-tip dd{margin:0;color:var(--ag-ink);font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+
+/* details panel */
+.ag-panel{position:absolute;top:10px;right:10px;bottom:10px;width:min(300px,calc(100% - 20px));z-index:25;background:var(--ag-surface);
+  border:1px solid var(--ag-border);border-radius:10px;box-shadow:0 12px 36px rgba(0,0,0,.16);padding:14px 16px;overflow:auto;font-size:12.5px}
+.ag-panel[hidden]{display:none}
+.ag-panel h3{margin:0 24px 4px 0;font-size:15px;font-weight:600;word-break:break-word}
+.ag-panel .ag-sub{color:var(--ag-ink-3);margin-bottom:12px}
+.ag-panel h4{margin:14px 0 6px;font-size:11.5px;font-weight:600;color:var(--ag-ink-2);text-transform:none}
+.ag-panel dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+.ag-panel dt{color:var(--ag-ink-3)}
+.ag-panel dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;word-break:break-word}
+.ag-panel ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.ag-panel li button{font:inherit;font-size:12px;border:1px solid var(--ag-border);background:transparent;color:var(--ag-ink);
+  border-radius:999px;padding:2px 9px;cursor:pointer}
+.ag-panel li button:hover{border-color:var(--ag-accent)}
+.ag-close{position:absolute;top:8px;right:8px;border:0;background:transparent;color:var(--ag-ink-3);font-size:18px;cursor:pointer;line-height:1}
+
+/* player */
+.ag-player{display:grid;grid-template-columns:auto auto 1fr auto auto;align-items:center;gap:10px;padding:10px 12px;
+  border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface)}
+.ag-player input[type=range]{width:100%;accent-color:var(--ag-accent)}
+.ag-time{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ag-ink-2);min-width:88px;text-align:right}
+.ag-player select{height:30px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);color:var(--ag-ink);font:inherit;font-size:12px}
+.ag-readout{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;padding:2px 4px 6px}
+.ag-ro{display:inline-flex;align-items:baseline;gap:5px}
+.ag-ro i{display:inline-block;width:12px;height:3px;border-radius:2px;transform:translateY(-3px)}
+.ag-ro b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ag-ink)}
+.ag-ro small{color:var(--ag-ink-3);font-size:12px}
+.ag-chart{border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);padding:6px 8px 2px;position:relative}
+.ag-chart svg{display:block;width:100%;height:auto}
+
+/* table view */
+.ag-table{border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);overflow:auto;max-height:420px}
+.ag-table[hidden]{display:none}
+.ag-table table{border-collapse:collapse;width:100%;font-size:12.5px}
+.ag-table th{position:sticky;top:0;background:var(--ag-surface);text-align:left;font-weight:600;color:var(--ag-ink-2);
+  padding:8px 12px;border-bottom:1px solid var(--ag-grid);cursor:pointer;white-space:nowrap}
+.ag-table th[aria-sort]::after{content:" ↓";color:var(--ag-ink-3)}
+.ag-table th[aria-sort=ascending]::after{content:" ↑"}
+.ag-table td{padding:6px 12px;border-bottom:1px solid var(--ag-grid);white-space:nowrap}
+.ag-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.ag-table tr:hover td{background:color-mix(in srgb,var(--ag-ink) 4%,transparent);cursor:pointer}
+.ag-foot{font-size:11.5px;color:var(--ag-ink-3);display:flex;gap:12px;flex-wrap:wrap}
+.ag-foot kbd{font-family:var(--ag-mono);font-size:10.5px;border:1px solid var(--ag-border);border-radius:4px;padding:0 4px}
+@media (max-width:560px){.ag-app{padding:10px}.ag-btn .ag-txt{display:none}.ag-player{grid-template-columns:auto 1fr auto}}

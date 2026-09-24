@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>University of Calgary main campus</title><style>html,body{margin:0;background:#f9f9f7}/* AryaGraph interactive view: all colors come from theme custom properties set on .ag-app */
+.ag-app{font-family:var(--ag-font);color:var(--ag-ink);background:var(--ag-bg);box-sizing:border-box;
+  padding:16px;min-height:100%;-webkit-font-smoothing:antialiased}
+.ag-app *,.ag-app *::before,.ag-app *::after{box-sizing:inherit}
+.ag-shell{max-width:var(--ag-max-w,1200px);margin:0 auto;display:flex;flex-direction:column;gap:10px}
+
+/* toolbar: one row above the content it scopes */
+.ag-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ag-search{position:relative;flex:1 1 220px;max-width:340px}
+.ag-search input{width:100%;height:32px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);
+  color:var(--ag-ink);font:inherit;font-size:13px;padding:0 10px 0 30px;outline:none}
+.ag-search input:focus{border-color:var(--ag-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--ag-accent) 18%,transparent)}
+.ag-search svg{position:absolute;left:9px;top:9px;width:14px;height:14px;stroke:var(--ag-ink-3);fill:none;stroke-width:2}
+.ag-results{position:absolute;top:36px;left:0;right:0;z-index:20;background:var(--ag-surface);border:1px solid var(--ag-border);
+  border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:4px;margin:0;list-style:none;max-height:280px;overflow:auto}
+.ag-results li{padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.ag-results li small{color:var(--ag-ink-3)}
+.ag-results li[aria-selected=true],.ag-results li:hover{background:color-mix(in srgb,var(--ag-ink) 6%,transparent)}
+.ag-spacer{flex:1}
+.ag-btn{height:32px;min-width:32px;padding:0 10px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);
+  color:var(--ag-ink-2);font:inherit;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.ag-btn:hover{color:var(--ag-ink);background:color-mix(in srgb,var(--ag-ink) 5%,var(--ag-surface))}
+.ag-btn[aria-pressed=true]{color:var(--ag-ink);border-color:color-mix(in srgb,var(--ag-ink) 30%,transparent)}
+.ag-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ag-btn:focus-visible,.ag-n:focus-visible{outline:2px solid var(--ag-accent);outline-offset:2px}
+
+/* stage */
+.ag-stage{position:relative;border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);overflow:hidden;
+  height:var(--ag-stage-h,70vh);touch-action:none;user-select:none;-webkit-user-select:none}
+.ag-stage>svg{display:block;width:100%;height:100%;cursor:grab}
+.ag-stage.ag-panning>svg{cursor:grabbing}
+.ag-n{cursor:pointer}
+.ag-stage.ag-dragging .ag-n{cursor:grabbing}
+
+/* neighborhood emphasis: CSS beats the presentation attributes */
+svg.ag-focus .ag-e{opacity:.05;transition:opacity .12s}
+svg.ag-focus .ag-e.ag-on{opacity:.95}
+svg.ag-focus .ag-n{opacity:.16;transition:opacity .12s}
+svg.ag-focus .ag-n.ag-on{opacity:1}
+svg.ag-focus .ag-l{opacity:.12}
+svg.ag-focus .ag-l.ag-on{opacity:1;visibility:visible}
+svg.ag-focus .ag-el{opacity:.1}
+svg.ag-focus .ag-el.ag-on{opacity:1}
+svg .ag-n.ag-sel .ag-shape{stroke:var(--ag-highlight);stroke-width:2.5}
+svg.ag-labels-all .ag-l{visibility:visible}
+svg.ag-labels-none .ag-l{visibility:hidden}
+svg .ag-e.ag-fire{opacity:1 !important}
+svg .ag-e.ag-fire .ag-edge{stroke:var(--ag-fire,#d03b3b);stroke-width:2.2}
+svg .ag-e.ag-fire .ag-arrow{fill:var(--ag-fire,#d03b3b)}
+.ag-legend-item{cursor:pointer}
+
+/* tooltip: value leads, label follows */
+.ag-tip{position:absolute;z-index:30;pointer-events:none;min-width:140px;max-width:300px;background:var(--ag-surface);
+  border:1px solid var(--ag-border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:10px 12px;font-size:12px;line-height:1.35}
+.ag-tip[hidden]{display:none}
+.ag-tip b{display:block;font-size:13px;font-weight:600;color:var(--ag-ink);margin-bottom:6px;word-break:break-word}
+.ag-tip dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0}
+.ag-tip dt{color:var(--ag-ink-3)}
+.ag-tip dd{margin:0;color:var(--ag-ink);font-variant-numeric:tabular-nums;text-align:right;word-break:break-word}
+
+/* details panel */
+.ag-panel{position:absolute;top:10px;right:10px;bottom:10px;width:min(300px,calc(100% - 20px));z-index:25;background:var(--ag-surface);
+  border:1px solid var(--ag-border);border-radius:10px;box-shadow:0 12px 36px rgba(0,0,0,.16);padding:14px 16px;overflow:auto;font-size:12.5px}
+.ag-panel[hidden]{display:none}
+.ag-panel h3{margin:0 24px 4px 0;font-size:15px;font-weight:600;word-break:break-word}
+.ag-panel .ag-sub{color:var(--ag-ink-3);margin-bottom:12px}
+.ag-panel h4{margin:14px 0 6px;font-size:11.5px;font-weight:600;color:var(--ag-ink-2);text-transform:none}
+.ag-panel dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0}
+.ag-panel dt{color:var(--ag-ink-3)}
+.ag-panel dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;word-break:break-word}
+.ag-panel ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.ag-panel li button{font:inherit;font-size:12px;border:1px solid var(--ag-border);background:transparent;color:var(--ag-ink);
+  border-radius:999px;padding:2px 9px;cursor:pointer}
+.ag-panel li button:hover{border-color:var(--ag-accent)}
+.ag-close{position:absolute;top:8px;right:8px;border:0;background:transparent;color:var(--ag-ink-3);font-size:18px;cursor:pointer;line-height:1}
+
+/* player */
+.ag-player{display:grid;grid-template-columns:auto auto 1fr auto auto;align-items:center;gap:10px;padding:10px 12px;
+  border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface)}
+.ag-player input[type=range]{width:100%;accent-color:var(--ag-accent)}
+.ag-time{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ag-ink-2);min-width:88px;text-align:right}
+.ag-player select{height:30px;border-radius:8px;border:1px solid var(--ag-border);background:var(--ag-surface);color:var(--ag-ink);font:inherit;font-size:12px}
+.ag-readout{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;padding:2px 4px 6px}
+.ag-ro{display:inline-flex;align-items:baseline;gap:5px}
+.ag-ro i{display:inline-block;width:12px;height:3px;border-radius:2px;transform:translateY(-3px)}
+.ag-ro b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ag-ink)}
+.ag-ro small{color:var(--ag-ink-3);font-size:12px}
+.ag-chart{border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);padding:6px 8px 2px;position:relative}
+.ag-chart svg{display:block;width:100%;height:auto}
+
+/* table view */
+.ag-table{border:1px solid var(--ag-border);border-radius:12px;background:var(--ag-surface);overflow:auto;max-height:420px}
+.ag-table[hidden]{display:none}
+.ag-table table{border-collapse:collapse;width:100%;font-size:12.5px}
+.ag-table th{position:sticky;top:0;background:var(--ag-surface);text-align:left;font-weight:600;color:var(--ag-ink-2);
+  padding:8px 12px;border-bottom:1px solid var(--ag-grid);cursor:pointer;white-space:nowrap}
+.ag-table th[aria-sort]::after{content:" ↓";color:var(--ag-ink-3)}
+.ag-table th[aria-sort=ascending]::after{content:" ↑"}
+.ag-table td{padding:6px 12px;border-bottom:1px solid var(--ag-grid);white-space:nowrap}
+.ag-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.ag-table tr:hover td{background:color-mix(in srgb,var(--ag-ink) 4%,transparent);cursor:pointer}
+.ag-foot{font-size:11.5px;color:var(--ag-ink-3);display:flex;gap:12px;flex-wrap:wrap}
+.ag-foot kbd{font-family:var(--ag-mono);font-size:10.5px;border:1px solid var(--ag-border);border-radius:4px;padding:0 4px}
+@media (max-width:560px){.ag-app{padding:10px}.ag-btn .ag-txt{display:none}.ag-player{grid-template-columns:auto 1fr auto}}
+</style></head><body><div class="ag-app" style="--ag-bg:#f9f9f7;--ag-surface:#fcfcfb;--ag-ink:#0b0b0b;--ag-ink-2:#52514e;--ag-ink-3:#898781;--ag-grid:#e1e0d9;--ag-axis:#c3c2b7;--ag-border:rgba(11,11,11,0.10);--ag-edge:#9d9b93;--ag-accent:#2a78d6;--ag-highlight:#2a78d6;--ag-font:system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, &quot;Vazirmatn&quot;, sans-serif;--ag-mono:ui-monospace, &quot;SF Mono&quot;, &quot;Cascadia Mono&quot;, Menlo, Consolas, monospace;--ag-max-w:1544px" data-theme="light"><div class="ag-shell"><div class="ag-toolbar" role="toolbar" aria-label="Graph controls"><div class="ag-search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg><input type="search" placeholder="Search nodes…" aria-label="Search nodes" autocomplete="off"><ul class="ag-results" role="listbox" hidden></ul></div><span class="ag-spacer"></span><button class="ag-btn" type="button" data-act="fit" title="Fit to view (0)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg><span class="ag-txt">Fit</span></button><button class="ag-btn" type="button" data-act="zoom-out" title="Zoom out (−)" aria-label="Zoom out"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10"/></svg></button><button class="ag-btn" type="button" data-act="zoom-in" title="Zoom in (+)" aria-label="Zoom in"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg></button><button class="ag-btn" type="button" data-act="labels" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M3 8h7M3 12h9"/></svg><span class="ag-txt">Labels: auto</span></button><button class="ag-btn" type="button" data-act="table" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 7h12M6 7v6"/></svg><span class="ag-txt">Table</span></button><button class="ag-btn" type="button" data-act="svg" title="Download SVG"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13h10"/></svg><span class="ag-txt">SVG</span></button><button class="ag-btn" type="button" data-act="png" title="Download PNG"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13h10"/></svg><span class="ag-txt">PNG</span></button></div><div class="ag-stage" style="aspect-ratio:1208.4/895.2;height:auto;max-height:82vh;max-width:1510px;margin:0 auto;width:100%"><svg xmlns="http://www.w3.org/2000/svg" class="ag-root" id="aga436f6" width="1208.37" height="895.17" viewBox="0 0 1208.37 895.17" role="img" aria-labelledby="aga436f6-t aga436f6-d" font-family="system-ui, -apple-system, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, &quot;Vazirmatn&quot;, sans-serif" text-rendering="geometricPrecision"><title id="aga436f6-t">University of Calgary main campus</title><desc id="aga436f6-d">Undirected graph with 56 nodes and 83 edges, custom layout.</desc><style>#aga436f6 text{font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Vazirmatn", sans-serif;}#aga436f6 .ag-legend-title,#aga436f6 .ag-title{letter-spacing:-0.01em}</style><rect class="ag-bg" width="1208.37" height="895.17" fill="#fcfcfb"/><g class="ag-header"><text class="ag-title" x="24" y="41" font-size="17" font-weight="600" fill="#0b0b0b">University of Calgary main campus</text><text class="ag-subtitle" x="24" y="63.83" font-size="12.5" fill="#52514e">Dark links: tunnels &amp; pedways · highlighted: Olympic Oval → Scurfield Hall, 1,002 m</text></g><g class="ag-viewport"><g class="ag-content" transform="translate(589.1,400.83)"><g class="ag-edges"><g class="ag-e" data-k="e0" data-u="n0" data-v="n8" opacity="0.14"><path class="ag-edge" d="M55.66,170.2L64.96,99.41" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e1" data-u="n0" data-v="n45" opacity="0.14"><path class="ag-edge" d="M53.49,170.54L32.94,127.81" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e2" data-u="n1" data-v="n42" opacity="0.14"><path class="ag-edge" d="M191.72,-3.82L195.08,17.41" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e3" data-u="n1" data-v="n50" opacity="0.14"><path class="ag-edge" d="M190.54,-33.55L193.57,-72.73" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e4" data-u="n2" data-v="n11" opacity="0.14"><path class="ag-edge" d="M-114.38,202.02L-97.42,157.8" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e5" data-u="n2" data-v="n29" opacity="0.14"><path class="ag-edge" d="M-126.83,205.06L-145.36,188.62" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e6" data-u="n2" data-v="n46" opacity="0.14"><path class="ag-edge" d="M-107.37,210.37L-64.48,201.98" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e7" data-u="n3" data-v="n50" opacity="0.14"><path class="ag-edge" d="M253.88,-142.2L205.86,-98.04" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e8" data-u="n3" data-v="n51" opacity="0.14"><path class="ag-edge" d="M253.02,-143.72L199.57,-128.02" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e9" data-u="n4" data-v="n38" opacity="0.14"><path class="ag-edge" d="M306.89,-28.49L298.32,72.88" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e10" data-u="n4" data-v="n49" opacity="0.14"><path class="ag-edge" d="M306.48,-28.55L295.12,29.92" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e11" data-u="n5" data-v="n10" opacity="0.14"><path class="ag-edge" d="M-91.5,-162.19L-97.16,-144.77" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e12" data-u="n5" data-v="n18" opacity="0.14"><path class="ag-edge" d="M-82.41,-172.96L-61.77,-183.81" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e13" data-u="n6" data-v="n23" opacity="0.14"><path class="ag-edge" d="M-260.71,135.51L-209.73,156.65" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e14" data-u="n6" data-v="n26" opacity="0.14"><path class="ag-edge" d="M-275.77,139.33L-324.06,198.85" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e15" data-u="n6" data-v="n40" opacity="0.14"><path class="ag-edge" d="M-262.33,125.46L-199.26,70.83" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e16" data-u="n6" data-v="n55" opacity="0.14"><path class="ag-edge" d="M-268.48,141.42L-262.89,186.88" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e17" data-u="n7" data-v="n43" opacity="0.14"><path class="ag-edge" d="M-558.35,220.2L-534.96,199.86" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e20" data-u="n8" data-v="n52" opacity="0.14"><path class="ag-edge" d="M65.78,69.99L63.51,39.85" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e21" data-u="n9" data-v="n10" opacity="0.14"><path class="ag-edge" d="M-145.96,-98.45L-111.82,-124.21" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e22" data-u="n9" data-v="n24" opacity="0.14"><path class="ag-edge" d="M-171.03,-91.35L-411.08,-114.03" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e23" data-u="n9" data-v="n31" opacity="0.14"><path class="ag-edge" d="M-149.85,-78.1L-115.35,-21.45" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e24" data-u="n10" data-v="n19" opacity="0.14"><path class="ag-edge" d="M-88.71,-136.38L-63.73,-144.74" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e25" data-u="n10" data-v="n20" opacity="0.14"><path class="ag-edge" d="M-89.33,-126.46L-58.29,-111.57" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e26" data-u="n11" data-v="n28" opacity="0.14"><path class="ag-edge" d="M-81.81,137.9L-73.69,132.26" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e27" data-u="n11" data-v="n30" opacity="0.14"><path class="ag-edge" d="M-89.34,132.64L-72.78,69.29" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e28" data-u="n11" data-v="n46" opacity="0.14"><path class="ag-edge" d="M-86.1,156.93L-62.62,197.9" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e29" data-u="n12" data-v="n13" opacity="0.14"><path class="ag-edge" d="M216.93,80.23L225.49,69.7" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e30" data-u="n12" data-v="n42" opacity="0.14"><path class="ag-edge" d="M213.24,79.57L203.89,52.59" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e31" data-u="n13" data-v="n38" opacity="0.14"><path class="ag-edge" d="M245.31,63.73L290.81,77.93" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e34" data-u="n14" data-v="n22" opacity="0.14"><path class="ag-edge" d="M87.92,-220.42L98.59,-177.63" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e35" data-u="n14" data-v="n27" opacity="0.14"><path class="ag-edge" d="M83.42,-221.16L52.8,-173.76" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e36" data-u="n14" data-v="n32" opacity="0.14"><path class="ag-edge" d="M84.2,-231.22L48.88,-310.71" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e37" data-u="n15" data-v="n16" opacity="0.14"><path class="ag-edge" d="M-2.94,-180.51L-5.17,-192.66" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e38" data-u="n15" data-v="n21" opacity="0.14"><path class="ag-edge" d="M-13.51,-167.38L-16.52,-167.28" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e39" data-u="n15" data-v="n27" opacity="0.14"><path class="ag-edge" d="M12.21,-166.69L34.34,-164.74" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e40" data-u="n16" data-v="n17" opacity="0.14"><path class="ag-edge" d="M-10.2,-202.24L-16.6,-208.61" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e41" data-u="n17" data-v="n18" opacity="0.14"><path class="ag-edge" d="M-25.52,-209.25L-47.83,-192.6" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e42" data-u="n17" data-v="n32" opacity="0.14"><path class="ag-edge" d="M-17.49,-217.69L45.17,-311.03" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e43" data-u="n18" data-v="n19" opacity="0.14"><path class="ag-edge" d="M-54.28,-179.4L-53.83,-158.8" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e44" data-u="n18" data-v="n21" opacity="0.14"><path class="ag-edge" d="M-47.98,-182.53L-37.39,-174.14" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e45" data-u="n19" data-v="n20" opacity="0.14"><path class="ag-edge" d="M-53.33,-137.45L-52.77,-115.15" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e46" data-u="n19" data-v="n21" opacity="0.14"><path class="ag-edge" d="M-45.01,-154.47L-37.63,-159.92" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e47" data-u="n20" data-v="n53" opacity="0.14"><path class="ag-edge" d="M-46.71,-106.61L-0.62,-89.16" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e48" data-u="n22" data-v="n27" opacity="0.14"><path class="ag-edge" d="M87.45,-163.45L58.29,-163.61" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e49" data-u="n22" data-v="n35" opacity="0.14"><path class="ag-edge" d="M116.34,-159.55L144.58,-151.95" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e50" data-u="n22" data-v="n48" opacity="0.14"><path class="ag-edge" d="M98.23,-149.2L90.67,-121.91" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e51" data-u="n22" data-v="n54" opacity="0.14"><path class="ag-edge" d="M116.6,-166.07L141.34,-170.69" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e52" data-u="n23" data-v="n29" opacity="0.14"><path class="ag-edge" d="M-194.62,163.14L-163.26,177.09" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e53" data-u="n23" data-v="n39" opacity="0.14"><path class="ag-edge" d="M-201.02,167.94L-197.24,195.68" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e54" data-u="n23" data-v="n40" opacity="0.14"><path class="ag-edge" d="M-201.09,151.64L-191.3,75.09" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e55" data-u="n25" data-v="n33" opacity="0.14"><path class="ag-edge" d="M107.33,-1.2L124.52,42.31" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e56" data-u="n25" data-v="n37" opacity="0.14"><path class="ag-edge" d="M106.57,-0.99L110.8,23.55" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e57" data-u="n25" data-v="n52" opacity="0.14"><path class="ag-edge" d="M103.02,-2.24L68.13,28.51" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e58" data-u="n26" data-v="n43" opacity="0.14"><path class="ag-edge" d="M-339.37,205.63L-522.28,195.52" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e59" data-u="n26" data-v="n55" opacity="0.14"><path class="ag-edge" d="M-320.71,204.58L-269.62,195.91" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e62" data-u="n29" data-v="n39" opacity="0.14"><path class="ag-edge" d="M-162.92,186.55L-188.46,200.17" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e64" data-u="n31" data-v="n36" opacity="0.14"><path class="ag-edge" d="M-88.18,-8.93L-25.33,-19.06" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e66" data-u="n33" data-v="n37" opacity="0.14"><path class="ag-edge" d="M121.63,43.83L114.98,33.96" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e68" data-u="n34" data-v="n36" opacity="0.14"><path class="ag-edge" d="M31.03,-42.73L-4.09,-25.75" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e69" data-u="n34" data-v="n48" opacity="0.14"><path class="ag-edge" d="M48.71,-57.44L80.22,-100.38" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e70" data-u="n34" data-v="n53" opacity="0.14"><path class="ag-edge" d="M33.63,-56.57L9.93,-82.07" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e71" data-u="n35" data-v="n51" opacity="0.14"><path class="ag-edge" d="M167.15,-140.29L176.22,-132.81" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e72" data-u="n35" data-v="n54" opacity="0.14"><path class="ag-edge" d="M151.08,-160.07L146.92,-167.99" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e73" data-u="n36" data-v="n53" opacity="0.14"><path class="ag-edge" d="M-11,-31.63L3.62,-80.59" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e74" data-u="n37" data-v="n52" opacity="0.14"><path class="ag-edge" d="M106.06,29.65L69.81,32.5" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e75" data-u="n38" data-v="n41" opacity="0.14"><path class="ag-edge" d="M299.74,87.03L408.23,459.74" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e76" data-u="n38" data-v="n49" opacity="0.14"><path class="ag-edge" d="M297.06,72.89L294.41,44.02" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e77" data-u="n39" data-v="n55" opacity="0.14"><path class="ag-edge" d="M-204.62,202.99L-254.24,195.73" fill="none" stroke="#c3c2b7" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e79" data-u="n47" data-v="n48" opacity="0.14"><path class="ag-edge" d="M133.67,-91.58L98.71,-105.64" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e80" data-u="n47" data-v="n50" opacity="0.14"><path class="ag-edge" d="M151.51,-88.07L179.62,-87.9" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e81" data-u="n47" data-v="n51" opacity="0.14"><path class="ag-edge" d="M149.44,-93.96L176.15,-115.7" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e" data-k="e82" data-u="n50" data-v="n51" opacity="0.14"><path class="ag-edge" d="M191.45,-102.56L189.56,-111.04" fill="none" stroke="#52514e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e18" data-u="n8" data-v="n33" opacity="1"><path class="ag-edge" d="M80.38,78.68L116.29,62.56" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e19" data-u="n8" data-v="n45" opacity="1"><path class="ag-edge" d="M54.94,93.46L38.56,105.41" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e32" data-u="n13" data-v="n42" opacity="1"><path class="ag-edge" d="M223.1,52.87L212.87,45.77" fill="none" stroke="#2a78d6" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e33" data-u="n13" data-v="n49" opacity="1"><path class="ag-edge" d="M245.06,55.54L287.1,39.47" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e60" data-u="n28" data-v="n30" opacity="1"><path class="ag-edge" d="M-62.97,108.12L-67.94,69.6" fill="none" stroke="#2a78d6" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e61" data-u="n28" data-v="n44" opacity="1"><path class="ag-edge" d="M-46.16,119.09L-21.36,111.79" fill="none" stroke="#2a78d6" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e63" data-u="n30" data-v="n31" opacity="1"><path class="ag-edge" d="M-75.92,46.01L-96.96,9.55" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e65" data-u="n31" data-v="n40" opacity="1"><path class="ag-edge" d="M-119.92,5.37L-179.92,54.54" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e67" data-u="n33" data-v="n42" opacity="1"><path class="ag-edge" d="M144.52,51.9L180.54,40.77" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g class="ag-e ag-hl" data-k="e78" data-u="n44" data-v="n45" opacity="1"><path class="ag-edge" d="M8.1,110.54L11.7,111.27" fill="none" stroke="#2a78d6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g></g><g class="ag-nodes"><g class="ag-n" data-k="n50" transform="translate(194.74,-87.8)" opacity="0.28"><path class="ag-shape" d="M-15.12,0a15.12,15.12 0 1,0 30.24,0a15.12,15.12 0 1,0 -30.24,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>SS
+degree: 4
+name: Social Sciences
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.207</title></g><g class="ag-n" data-k="n1" transform="translate(189.38,-18.62)" opacity="0.28"><path class="ag-shape" d="M-14.98,0a14.98,14.98 0 1,0 29.96,0a14.98,14.98 0 1,0 -29.96,0Z" fill="#a3a199" stroke="#fcfcfb" stroke-width="1.75"/><title>AD
+degree: 2
+name: Administration Building
+kind: administration
+lat: 51.1
+lon: -114
+betweenness: 0.203</title></g><g class="ag-n" data-k="n22" transform="translate(102.15,-163.36)" opacity="0.28"><path class="ag-shape" d="M-14.7,0a14.7,14.7 0 1,0 29.4,0a14.7,14.7 0 1,0 -29.4,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ES
+degree: 5
+name: Earth Sciences
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.195</title></g><g class="ag-n" data-k="n9" transform="translate(-157.12,-90.04)" opacity="0.28"><path class="ag-shape" d="M-13.97,0a13.97,13.97 0 1,0 27.95,0a13.97,13.97 0 1,0 -27.95,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>CR
+degree: 3
+name: Crowsnest Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.175</title></g><g class="ag-n" data-k="n51" transform="translate(186.62,-124.21)" opacity="0.28"><path class="ag-shape" d="M-13.49,0a13.49,13.49 0 1,0 26.99,0a13.49,13.49 0 1,0 -26.99,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ST
+degree: 4
+name: Science Theatres
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.162</title></g><g class="ag-n" data-k="n10" transform="translate(-101.26,-132.18)" opacity="0.28"><path class="ag-shape" d="M-13.23,0a13.23,13.23 0 1,0 26.47,0a13.23,13.23 0 1,0 -26.47,0Z" fill="#eda100" stroke="#fcfcfb" stroke-width="1.75"/><title>CSSH
+degree: 4
+name: Cenovus Spo'pi Solar House
+kind: research
+lat: 51.1
+lon: -114
+betweenness: 0.156</title></g><g class="ag-n" data-k="n11" transform="translate(-92.68,145.45)" opacity="0.28"><path class="ag-shape" d="M-13.23,0a13.23,13.23 0 1,0 26.47,0a13.23,13.23 0 1,0 -26.47,0Z" fill="#4a3aa7" stroke="#fcfcfb" stroke-width="1.75"/><title>DC
+degree: 4
+name: Dining Centre
+kind: student-life
+lat: 51.1
+lon: -114
+betweenness: 0.156</title></g><g class="ag-n" data-k="n35" transform="translate(157.13,-148.57)" opacity="0.28"><path class="ag-shape" d="M-12.99,0a12.99,12.99 0 1,0 25.99,0a12.99,12.99 0 1,0 -25.99,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>MS
+degree: 3
+name: Mathematical Sciences
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.149</title></g><g class="ag-n" data-k="n15" transform="translate(-0.63,-167.83)" opacity="0.28"><path class="ag-shape" d="M-12.89,0a12.89,12.89 0 1,0 25.78,0a12.89,12.89 0 1,0 -25.78,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ENA
+degree: 3
+name: Engineering Block A
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.147</title></g><g class="ag-n" data-k="n48" transform="translate(87.42,-110.18)" opacity="0.28"><path class="ag-shape" d="M-12.17,0a12.17,12.17 0 1,0 24.34,0a12.17,12.17 0 1,0 -24.34,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>SB
+degree: 3
+name: Science B
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.129</title></g><g class="ag-n" data-k="n27" transform="translate(46.29,-163.68)" opacity="0.28"><path class="ag-shape" d="M-12,0a12,12 0 1,0 23.99,0a12,12 0 1,0 -23.99,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ICT
+degree: 3
+name: Information and Communications Technology
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.125</title></g><g class="ag-n" data-k="n34" transform="translate(41.7,-47.89)" opacity="0.28"><path class="ag-shape" d="M-11.85,0a11.85,11.85 0 1,0 23.7,0a11.85,11.85 0 1,0 -23.7,0Z" fill="#4a3aa7" stroke="#fcfcfb" stroke-width="1.75"/><title>MH
+degree: 3
+name: MacEwan Hall
+kind: student-life
+lat: 51.1
+lon: -114
+betweenness: 0.122</title></g><g class="ag-n" data-k="n21" transform="translate(-28.22,-166.87)" opacity="0.28"><path class="ag-shape" d="M-11.7,0a11.7,11.7 0 1,0 23.41,0a11.7,11.7 0 1,0 -23.41,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ENG
+degree: 3
+name: Engineering Block G
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.119</title></g><g class="ag-n" data-k="n2" transform="translate(-118.41,212.53)" opacity="0.28"><path class="ag-shape" d="M-11.25,0a11.25,11.25 0 1,0 22.5,0a11.25,11.25 0 1,0 -22.5,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>AU
+degree: 3
+name: Aurora Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.108</title></g><g class="ag-n" data-k="n36" transform="translate(-14.22,-20.85)" opacity="0.28"><path class="ag-shape" d="M-11.25,0a11.25,11.25 0 1,0 22.5,0a11.25,11.25 0 1,0 -22.5,0Z" fill="#4a3aa7" stroke="#fcfcfb" stroke-width="1.75"/><title>MSC
+degree: 3
+name: MacEwan Student Centre
+kind: student-life
+lat: 51.1
+lon: -114
+betweenness: 0.108</title></g><g class="ag-n" data-k="n29" transform="translate(-153.42,181.47)" opacity="0.28"><path class="ag-shape" d="M-10.78,0a10.78,10.78 0 1,0 21.55,0a10.78,10.78 0 1,0 -21.55,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>KA
+degree: 3
+name: Kananaskis Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.0983</title></g><g class="ag-n" data-k="n19" transform="translate(-53.6,-148.12)" opacity="0.28"><path class="ag-shape" d="M-10.68,0a10.68,10.68 0 1,0 21.36,0a10.68,10.68 0 1,0 -21.36,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ENE
+degree: 4
+name: Engineering Block E
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0963</title></g><g class="ag-n" data-k="n6" transform="translate(-269.66,131.8)" opacity="0.28"><path class="ag-shape" d="M-9.69,0a9.69,9.69 0 1,0 19.38,0a9.69,9.69 0 1,0 -19.38,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>CD
+degree: 4
+name: Cascade Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.0768</title></g><g class="ag-n" data-k="n26" transform="translate(-329.98,206.15)" opacity="0.28"><path class="ag-shape" d="M-9.4,0a9.4,9.4 0 1,0 18.8,0a9.4,9.4 0 1,0 -18.8,0Z" fill="#008300" stroke="#fcfcfb" stroke-width="1.75"/><title>HP
+degree: 3
+name: Central Heating and Cooling Plant
+kind: services
+lat: 51.1
+lon: -114
+betweenness: 0.0714</title></g><g class="ag-n" data-k="n47" transform="translate(142.26,-88.12)" opacity="0.28"><path class="ag-shape" d="M-9.25,0a9.25,9.25 0 1,0 18.5,0a9.25,9.25 0 1,0 -18.5,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>SA
+degree: 3
+name: Science A
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0687</title></g><g class="ag-n" data-k="n39" transform="translate(-196.08,204.24)" opacity="0.28"><path class="ag-shape" d="M-8.63,0a8.63,8.63 0 1,0 17.26,0a8.63,8.63 0 1,0 -17.26,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>OL
+degree: 3
+name: Olympus Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.0579</title></g><g class="ag-n" data-k="n18" transform="translate(-54.45,-187.66)" opacity="0.28"><path class="ag-shape" d="M-8.26,0a8.26,8.26 0 1,0 16.52,0a8.26,8.26 0 1,0 -16.52,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>END
+degree: 4
+name: Engineering Block D
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0519</title></g><g class="ag-n" data-k="n23" transform="translate(-202.13,159.79)" opacity="0.28"><path class="ag-shape" d="M-8.22,0a8.22,8.22 0 1,0 16.44,0a8.22,8.22 0 1,0 -16.44,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>GL
+degree: 4
+name: Glacier Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.0512</title></g><g class="ag-n" data-k="n55" transform="translate(-261.94,194.61)" opacity="0.28"><path class="ag-shape" d="M-7.79,0a7.79,7.79 0 1,0 15.57,0a7.79,7.79 0 1,0 -15.57,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>YA
+degree: 3
+name: Yamnuska Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.0444</title></g><g class="ag-n" data-k="n5" transform="translate(-89.14,-169.42)" opacity="0.28"><path class="ag-shape" d="M-7.61,0a7.61,7.61 0 1,0 15.21,0a7.61,7.61 0 1,0 -15.21,0Z" fill="#eda100" stroke="#fcfcfb" stroke-width="1.75"/><title>CCIT
+degree: 2
+name: Calgary Centre for Innovative Technology
+kind: research
+lat: 51.1
+lon: -114
+betweenness: 0.0418</title></g><g class="ag-n" data-k="n38" transform="translate(297.72,80.09)" opacity="0.28"><path class="ag-shape" d="M-7.23,0a7.23,7.23 0 1,0 14.46,0a7.23,7.23 0 1,0 -14.46,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>MTH
+degree: 4
+name: Mathison Hall
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0364</title></g><g class="ag-n" data-k="n43" transform="translate(-529.5,195.12)" opacity="0.28"><path class="ag-shape" d="M-7.23,0a7.23,7.23 0 1,0 14.46,0a7.23,7.23 0 1,0 -14.46,0Z" fill="#008300" stroke="#fcfcfb" stroke-width="1.75"/><title>PP
+degree: 2
+name: Physical Plant
+kind: services
+lat: 51.1
+lon: -114
+betweenness: 0.0364</title></g><g class="ag-n" data-k="n52" transform="translate(63,33.03)" opacity="0.28"><path class="ag-shape" d="M-6.84,0a6.84,6.84 0 1,0 13.67,0a6.84,6.84 0 1,0 -13.67,0Z" fill="#a3a199" stroke="#fcfcfb" stroke-width="1.75"/><title>TFDL
+degree: 3
+name: Taylor Family Digital Library
+kind: library
+lat: 51.1
+lon: -114
+betweenness: 0.031</title></g><g class="ag-n" data-k="n53" transform="translate(5.48,-86.85)" opacity="0.28"><path class="ag-shape" d="M-6.53,0a6.53,6.53 0 1,0 13.05,0a6.53,6.53 0 1,0 -13.05,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>TI
+degree: 3
+name: Taylor Institute for Teaching and Learning
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0269</title></g><g class="ag-n" data-k="n20" transform="translate(-52.61,-108.85)" opacity="0.28"><path class="ag-shape" d="M-6.31,0a6.31,6.31 0 1,0 12.62,0a6.31,6.31 0 1,0 -12.62,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>ENF
+degree: 3
+name: Engineering Block F
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0242</title></g><g class="ag-n" data-k="n17" transform="translate(-20.79,-212.78)" opacity="0.28"><path class="ag-shape" d="M-5.91,0a5.91,5.91 0 1,0 11.82,0a5.91,5.91 0 1,0 -11.82,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.42"/><title>ENC
+degree: 3
+name: Engineering Block C
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0195</title></g><g class="ag-n" data-k="n14" transform="translate(86.53,-225.98)" opacity="0.28"><path class="ag-shape" d="M-5.73,0a5.73,5.73 0 1,0 11.47,0a5.73,5.73 0 1,0 -11.47,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.38"/><title>EEEL
+degree: 3
+name: Energy Environment Experiential Learning
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0175</title></g><g class="ag-n" data-k="n37" transform="translate(111.78,29.2)" opacity="0.28"><path class="ag-shape" d="M-5.73,0a5.73,5.73 0 1,0 11.47,0a5.73,5.73 0 1,0 -11.47,0Z" fill="#a3a199" stroke="#fcfcfb" stroke-width="1.38"/><title>MT
+degree: 3
+name: MacKimmie Tower
+kind: administration
+lat: 51.1
+lon: -114
+betweenness: 0.0175</title></g><g class="ag-n" data-k="n16" transform="translate(-6.19,-198.24)" opacity="0.28"><path class="ag-shape" d="M-5.67,0a5.67,5.67 0 1,0 11.34,0a5.67,5.67 0 1,0 -11.34,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.36"/><title>ENB
+degree: 2
+name: Engineering Block B
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.0168</title></g><g class="ag-n" data-k="n0" transform="translate(55.16,174.01)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="0.92"/><title>AB
+degree: 2
+name: Art Building &amp; Art Parkade
+kind: arts
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n3" transform="translate(256.71,-144.81)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="0.92"/><title>BI
+degree: 2
+name: Biological Sciences
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n4" transform="translate(307.22,-32.33)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#008300" stroke="#fcfcfb" stroke-width="0.92"/><title>CC
+degree: 2
+name: Child Care Centre
+kind: services
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n7" transform="translate(-561.25,222.73)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#eda100" stroke="#fcfcfb" stroke-width="0.92"/><title>CDC
+degree: 1
+name: Child Development Centre
+kind: research
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n12" transform="translate(214.5,83.21)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="0.92"/><title>EDC
+degree: 2
+name: Education Classrooms
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n24" transform="translate(-414.91,-114.39)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#008300" stroke="#fcfcfb" stroke-width="0.92"/><title>GR
+degree: 1
+name: Grounds Building
+kind: services
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n25" transform="translate(105.91,-4.78)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#4a3aa7" stroke="#fcfcfb" stroke-width="0.92"/><title>HNSC
+degree: 3
+name: Hunter Student Commons
+kind: student-life
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n32" transform="translate(47.31,-314.23)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="0.92"/><title>MEB
+degree: 2
+name: Mechanical Engineering Building
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n41" transform="translate(409.3,463.44)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#008300" stroke="#fcfcfb" stroke-width="0.92"/><title>OVC
+degree: 1
+name: Olympic Volunteer Centre
+kind: services
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n46" transform="translate(-60.7,201.24)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="0.92"/><title>RU
+degree: 2
+name: Rundle Hall
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n" data-k="n54" transform="translate(145.13,-171.4)" opacity="0.28"><path class="ag-shape" d="M-3.85,0a3.85,3.85 0 1,0 7.7,0a3.85,3.85 0 1,0 -7.7,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="0.92"/><title>TRB
+degree: 2
+name: Trailer B (Mathematical Science)
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0</title></g><g class="ag-n ag-hl" data-k="n42" transform="translate(197.92,35.39)"><path class="ag-halo" d="M-21.45,0a21.45,21.45 0 1,0 42.9,0a21.45,21.45 0 1,0 -42.9,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-18.2,0a18.2,18.2 0 1,0 36.4,0a18.2,18.2 0 1,0 -36.4,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>PF
+degree: 4
+name: Professional Faculties
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.307</title></g><g class="ag-n ag-hl" data-k="n31" transform="translate(-105.98,-6.06)"><path class="ag-halo" d="M-21.28,0a21.28,21.28 0 1,0 42.56,0a21.28,21.28 0 1,0 -42.56,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-18.03,0a18.03,18.03 0 1,0 36.06,0a18.03,18.03 0 1,0 -36.06,0Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.75"/><title>KNB
+degree: 4
+name: Dr. Roger Jackson Kinesiology Complex (Block B)
+kind: athletics
+lat: 51.1
+lon: -114
+betweenness: 0.301</title></g><g class="ag-n ag-hl" data-k="n28" transform="translate(-60.99,123.45)"><path class="ag-halo" d="M-18.71,0a18.71,18.71 0 1,0 37.42,0a18.71,18.71 0 1,0 -37.42,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-15.46,0a15.46,15.46 0 1,0 30.92,0a15.46,15.46 0 1,0 -30.92,0Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="1.75"/><title>IH
+degree: 3
+name: International House
+kind: residence
+lat: 51.1
+lon: -114
+betweenness: 0.218</title></g><g class="ag-n ag-hl" data-k="n44" transform="translate(-6.79,107.51)"><path class="ag-halo" d="M-18.44,0a18.44,18.44 0 1,0 36.87,0a18.44,18.44 0 1,0 -36.87,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-15.19,0a15.19,15.19 0 1,0 30.37,0a15.19,15.19 0 1,0 -30.37,0Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.75"/><title>RC
+degree: 2
+name: Rozsa Centre
+kind: arts
+lat: 51.1
+lon: -114
+betweenness: 0.209</title></g><g class="ag-n ag-hl" data-k="n33" transform="translate(130.08,56.37)"><path class="ag-halo" d="M-18.37,0a18.37,18.37 0 1,0 36.74,0a18.37,18.37 0 1,0 -36.74,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-15.12,0a15.12,15.12 0 1,0 30.24,0a15.12,15.12 0 1,0 -30.24,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>MFH
+degree: 4
+name: Murray Fraser Hall
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.207</title></g><g class="ag-n ag-hl" data-k="n45" transform="translate(26.43,114.27)"><path class="ag-halo" d="M-18.28,0a18.28,18.28 0 1,0 36.55,0a18.28,18.28 0 1,0 -36.55,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-15.03,0a15.03,15.03 0 1,0 30.05,0a15.03,15.03 0 1,0 -30.05,0Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.75"/><title>RT
+degree: 3
+name: Reeve Theatre
+kind: arts
+lat: 51.1
+lon: -114
+betweenness: 0.205</title></g><g class="ag-n ag-hl" data-k="n8" transform="translate(66.89,84.74)"><path class="ag-halo" d="M-18.04,0a18.04,18.04 0 1,0 36.09,0a18.04,18.04 0 1,0 -36.09,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-14.79,0a14.79,14.79 0 1,0 29.59,0a14.79,14.79 0 1,0 -29.59,0Z" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.75"/><title>CH
+degree: 4
+name: Craigie Hall (incl. University Theatre)
+kind: arts
+lat: 51.1
+lon: -114
+betweenness: 0.198</title></g><g class="ag-n ag-hl" data-k="n30" transform="translate(-69.57,57.01)"><path class="ag-halo" d="M-15.95,0a15.95,15.95 0 1,0 31.9,0a15.95,15.95 0 1,0 -31.9,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-12.7,0a12.7,12.7 0 1,0 25.4,0a12.7,12.7 0 1,0 -25.4,0Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.75"/><title>KNA
+degree: 3
+name: Dr. Roger Jackson Kinesiology Complex (Block A)
+kind: athletics
+lat: 51.1
+lon: -114
+betweenness: 0.142</title></g><g class="ag-n ag-hl" data-k="n40" transform="translate(-189.7,62.55)"><path class="ag-halo" d="M-15.89,0a15.89,15.89 0 1,0 31.79,0a15.89,15.89 0 1,0 -31.79,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-12.64,0a12.64,12.64 0 1,0 25.29,0a12.64,12.64 0 1,0 -25.29,0Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="1.75"/><title>OO
+degree: 3
+name: Olympic Oval
+kind: athletics
+lat: 51.1
+lon: -114
+betweenness: 0.141</title></g><g class="ag-n ag-hl" data-k="n13" transform="translate(233.38,60)"><path class="ag-halo" d="M-15.76,0a15.76,15.76 0 1,0 31.51,0a15.76,15.76 0 1,0 -31.51,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-12.51,0a12.51,12.51 0 1,0 25.01,0a12.51,12.51 0 1,0 -25.01,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>EDT
+degree: 4
+name: Education Tower
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.137</title></g><g class="ag-n ag-hl" data-k="n49" transform="translate(293.76,36.92)"><path class="ag-halo" d="M-10.38,0a10.38,10.38 0 1,0 20.77,0a10.38,10.38 0 1,0 -20.77,0Z" fill="none" stroke="#2a78d6" stroke-width="1.6"/><path class="ag-shape" d="M-7.13,0a7.13,7.13 0 1,0 14.27,0a7.13,7.13 0 1,0 -14.27,0Z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.75"/><title>SH
+degree: 3
+name: Scurfield Hall
+kind: academic
+lat: 51.1
+lon: -114
+betweenness: 0.035</title></g></g><g class="ag-labels"><g class="ag-l" data-k="n0" transform="translate(55.16,174.01)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">AB</text></g><g class="ag-l" data-k="n1" transform="translate(189.38,-18.62)" opacity="0.45"><text class="ag-lbl" x="18.98" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">AD</text></g><g class="ag-l" data-k="n2" transform="translate(-118.41,212.53)" opacity="0.45"><text class="ag-lbl" x="15.25" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">AU</text></g><g class="ag-l" data-k="n3" transform="translate(256.71,-144.81)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">BI</text></g><g class="ag-l" data-k="n4" transform="translate(307.22,-32.33)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CC</text></g><g class="ag-l" data-k="n5" transform="translate(-89.14,-169.42)" opacity="0.45"><text class="ag-lbl" x="-11.61" y="4.03" font-size="11.5" font-weight="500" text-anchor="end" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CCIT</text></g><g class="ag-l" data-k="n6" transform="translate(-269.66,131.8)" opacity="0.45"><text class="ag-lbl" x="13.69" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CD</text></g><g class="ag-l" data-k="n7" transform="translate(-561.25,222.73)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CDC</text></g><g class="ag-l" data-k="n8" transform="translate(66.89,84.74)"><text class="ag-lbl" x="18.79" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CH</text></g><g class="ag-l" data-k="n9" transform="translate(-157.12,-90.04)" opacity="0.45"><text class="ag-lbl" x="17.97" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CR</text></g><g class="ag-l" data-k="n10" transform="translate(-101.26,-132.18)" opacity="0.45"><text class="ag-lbl" x="-17.23" y="4.03" font-size="11.5" font-weight="500" text-anchor="end" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">CSSH</text></g><g class="ag-l" data-k="n11" transform="translate(-92.68,145.45)" opacity="0.45"><text class="ag-lbl" x="-17.23" y="4.03" font-size="11.5" font-weight="500" text-anchor="end" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">DC</text></g><g class="ag-l" data-k="n12" transform="translate(214.5,83.21)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">EDC</text></g><g class="ag-l" data-k="n13" transform="translate(233.38,60)"><text class="ag-lbl" x="16.51" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">EDT</text></g><g class="ag-l" data-k="n14" transform="translate(86.53,-225.98)" opacity="0.45"><text class="ag-lbl" x="9.73" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">EEEL</text></g><g class="ag-l" data-k="n15" transform="translate(-0.63,-167.83)" opacity="0.45"><text class="ag-lbl" x="0" y="25.47" font-size="11.5" font-weight="500" text-anchor="middle" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENA</text></g><g class="ag-l" data-k="n16" transform="translate(-6.19,-198.24)" opacity="0.45"><text class="ag-lbl" x="9.67" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENB</text></g><g class="ag-l" data-k="n17" transform="translate(-20.79,-212.78)" opacity="0.45"><text class="ag-lbl" x="9.91" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENC</text></g><g class="ag-l" data-k="n18" transform="translate(-54.45,-187.66)" opacity="0.45"><text class="ag-lbl" x="12.26" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">END</text></g><g class="ag-l" data-k="n19" transform="translate(-53.6,-148.12)" opacity="0.45"><text class="ag-lbl" x="0" y="23.26" font-size="11.5" font-weight="500" text-anchor="middle" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENE</text></g><g class="ag-l" data-k="n20" transform="translate(-52.61,-108.85)" opacity="0.45"><text class="ag-lbl" x="10.31" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENF</text></g><g class="ag-l" data-k="n21" transform="translate(-28.22,-166.87)" opacity="0.45"><text class="ag-lbl" x="-15.7" y="4.03" font-size="11.5" font-weight="500" text-anchor="end" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ENG</text></g><g class="ag-l" data-k="n22" transform="translate(102.15,-163.36)" opacity="0.45"><text class="ag-lbl" x="18.7" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ES</text></g><g class="ag-l" data-k="n23" transform="translate(-202.13,159.79)" opacity="0.45"><text class="ag-lbl" x="12.22" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">GL</text></g><g class="ag-l" data-k="n24" transform="translate(-414.91,-114.39)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">GR</text></g><g class="ag-l" data-k="n25" transform="translate(105.91,-4.78)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">HNSC</text></g><g class="ag-l" data-k="n26" transform="translate(-329.98,206.15)" opacity="0.45"><text class="ag-lbl" x="13.4" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">HP</text></g><g class="ag-l" data-k="n27" transform="translate(46.29,-163.68)" opacity="0.45"><text class="ag-lbl" x="16" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ICT</text></g><g class="ag-l" data-k="n28" transform="translate(-60.99,123.45)"><text class="ag-lbl" x="19.46" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">IH</text></g><g class="ag-l" data-k="n29" transform="translate(-153.42,181.47)" opacity="0.45"><text class="ag-lbl" x="14.78" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">KA</text></g><g class="ag-l" data-k="n30" transform="translate(-69.57,57.01)"><text class="ag-lbl" x="16.7" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">KNA</text></g><g class="ag-l" data-k="n31" transform="translate(-105.98,-6.06)"><text class="ag-lbl" x="22.03" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">KNB</text></g><g class="ag-l" data-k="n32" transform="translate(47.31,-314.23)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MEB</text></g><g class="ag-l" data-k="n33" transform="translate(130.08,56.37)"><text class="ag-lbl" x="19.12" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MFH</text></g><g class="ag-l" data-k="n34" transform="translate(41.7,-47.89)" opacity="0.45"><text class="ag-lbl" x="15.85" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MH</text></g><g class="ag-l" data-k="n35" transform="translate(157.13,-148.57)" opacity="0.45"><text class="ag-lbl" x="16.99" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MS</text></g><g class="ag-l" data-k="n36" transform="translate(-14.22,-20.85)" opacity="0.45"><text class="ag-lbl" x="15.25" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MSC</text></g><g class="ag-l" data-k="n37" transform="translate(111.78,29.2)" opacity="0.45"><text class="ag-lbl" x="9.73" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MT</text></g><g class="ag-l" data-k="n38" transform="translate(297.72,80.09)" opacity="0.45"><text class="ag-lbl" x="11.23" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">MTH</text></g><g class="ag-l" data-k="n39" transform="translate(-196.08,204.24)" opacity="0.45"><text class="ag-lbl" x="12.63" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">OL</text></g><g class="ag-l" data-k="n40" transform="translate(-189.7,62.55)"><text class="ag-lbl" x="16.64" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">OO</text></g><g class="ag-l" data-k="n41" transform="translate(409.3,463.44)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">OVC</text></g><g class="ag-l" data-k="n42" transform="translate(197.92,35.39)"><text class="ag-lbl" x="22.2" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">PF</text></g><g class="ag-l" data-k="n43" transform="translate(-529.5,195.12)" opacity="0.45"><text class="ag-lbl" x="11.23" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">PP</text></g><g class="ag-l" data-k="n44" transform="translate(-6.79,107.51)"><text class="ag-lbl" x="-19.19" y="4.03" font-size="11.5" font-weight="500" text-anchor="end" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">RC</text></g><g class="ag-l" data-k="n45" transform="translate(26.43,114.27)"><text class="ag-lbl" x="19.03" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">RT</text></g><g class="ag-l" data-k="n46" transform="translate(-60.7,201.24)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">RU</text></g><g class="ag-l" data-k="n47" transform="translate(142.26,-88.12)" opacity="0.45"><text class="ag-lbl" x="13.25" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">SA</text></g><g class="ag-l" data-k="n48" transform="translate(87.42,-110.18)" opacity="0.45"><text class="ag-lbl" x="16.17" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">SB</text></g><g class="ag-l" data-k="n49" transform="translate(293.76,36.92)"><text class="ag-lbl" x="11.13" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#0b0b0b" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">SH</text></g><g class="ag-l" data-k="n50" transform="translate(194.74,-87.8)" opacity="0.45"><text class="ag-lbl" x="19.12" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">SS</text></g><g class="ag-l" data-k="n51" transform="translate(186.62,-124.21)" opacity="0.45"><text class="ag-lbl" x="17.49" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">ST</text></g><g class="ag-l" data-k="n52" transform="translate(63,33.03)" opacity="0.45"><text class="ag-lbl" x="10.84" y="4.02" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">TFDL</text></g><g class="ag-l" data-k="n53" transform="translate(5.48,-86.85)" opacity="0.45"><text class="ag-lbl" x="10.53" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">TI</text></g><g class="ag-l" data-k="n54" transform="translate(145.13,-171.4)" opacity="0.45"><text class="ag-lbl" x="7.85" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">TRB</text></g><g class="ag-l" data-k="n55" transform="translate(-261.94,194.61)" opacity="0.45"><text class="ag-lbl" x="11.79" y="4.03" font-size="11.5" font-weight="500" text-anchor="start" fill="#898781" stroke="#fcfcfb" stroke-width="3" stroke-linejoin="round" paint-order="stroke">YA</text></g></g></g></g><g class="ag-legend"><g class="ag-legend-block" data-channel="node_color" transform="translate(1068.95,83.7)"><text class="ag-legend-title" x="0" y="12" font-size="11.5" font-weight="600" fill="#52514e">kind</text><circle cx="6" cy="29.2" r="5" fill="#2a78d6"/><text class="ag-legend-item" data-value="academic" x="18" y="33.4" font-size="12" fill="#0b0b0b">academic<tspan dx="8" font-size="11" fill="#898781">25</tspan></text><circle cx="6" cy="49.2" r="5" fill="#eb6834"/><text class="ag-legend-item" data-value="arts" x="18" y="53.4" font-size="12" fill="#0b0b0b">arts<tspan dx="8" font-size="11" fill="#898781">4</tspan></text><circle cx="6" cy="69.2" r="5" fill="#1baf7a"/><text class="ag-legend-item" data-value="athletics" x="18" y="73.4" font-size="12" fill="#0b0b0b">athletics<tspan dx="8" font-size="11" fill="#898781">3</tspan></text><circle cx="6" cy="89.2" r="5" fill="#eda100"/><text class="ag-legend-item" data-value="research" x="18" y="93.4" font-size="12" fill="#0b0b0b">research<tspan dx="8" font-size="11" fill="#898781">3</tspan></text><circle cx="6" cy="109.2" r="5" fill="#e87ba4"/><text class="ag-legend-item" data-value="residence" x="18" y="113.4" font-size="12" fill="#0b0b0b">residence<tspan dx="8" font-size="11" fill="#898781">9</tspan></text><circle cx="6" cy="129.2" r="5" fill="#008300"/><text class="ag-legend-item" data-value="services" x="18" y="133.4" font-size="12" fill="#0b0b0b">services<tspan dx="8" font-size="11" fill="#898781">5</tspan></text><circle cx="6" cy="149.2" r="5" fill="#4a3aa7"/><text class="ag-legend-item" data-value="student-life" x="18" y="153.4" font-size="12" fill="#0b0b0b">student-life<tspan dx="8" font-size="11" fill="#898781">4</tspan></text><circle cx="6" cy="169.2" r="5" fill="#a3a199"/><text class="ag-legend-item" x="18" y="173.4" font-size="12" fill="#0b0b0b">Other (2)<tspan dx="8" font-size="11" fill="#898781">3</tspan></text></g><g class="ag-legend-block" data-channel="node_size" transform="translate(1068.95,280.9)"><text class="ag-legend-title" x="0" y="12" font-size="11.5" font-weight="600" fill="#52514e">betweenness</text><circle cx="3.85" cy="55.35" r="3.85" fill="#898781" fill-opacity="0.22" stroke="#898781" stroke-width="1"/><text x="3.85" y="75.2" font-size="11" text-anchor="middle" fill="#898781">0</text><circle cx="36.56" cy="44.33" r="14.86" fill="#898781" fill-opacity="0.22" stroke="#898781" stroke-width="1"/><text x="36.56" y="75.2" font-size="11" text-anchor="middle" fill="#898781">0.2</text><circle cx="83.42" cy="41.2" r="18" fill="#898781" fill-opacity="0.22" stroke="#898781" stroke-width="1"/><text x="83.42" y="75.2" font-size="11" text-anchor="middle" fill="#898781">0.3</text></g></g></svg><div class="ag-tip" role="tooltip" hidden></div><aside class="ag-panel" aria-label="Node details" hidden></aside></div><div class="ag-table" hidden></div><div class="ag-foot"><span>Scroll or pinch to zoom · drag to pan · drag nodes to move them · click a node to pin its neighborhood · click legend entries to filter</span><span><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd> <kbd>Esc</kbd></span></div><script type="application/json" class="ag-data">{"uid":"aga436f6","name":"University of Calgary main campus","size":[1208.37,895.17],"offset":[589.1,400.83],"directed":false,"axis":"y","shapes":{"circle":{"t":"e"},"ellipse":{"t":"e"},"square":{"t":"r","r":0.0},"rect":{"t":"r","r":0.0},"box":{"t":"r","r":6.0},"roundrect":{"t":"r","r":6.0},"pill":{"t":"r","r":null},"diamond":{"t":"p","v":[[0,-1],[1,0],[0,1],[-1,0]]},"triangle":{"t":"p","v":[[7.070501591499379e-17,-1.0],[1.0,1.0],[-1.0,1.0]]},"triangle_down":{"t":"p","v":[[1.9890252834056477e-16,1.0],[-1.0,-0.9999999999999997],[1.0,-1.0]]},"hexagon":{"t":"p","v":[[1.0,-6.409875621278547e-17],[0.5000000000000001,1.0],[-0.4999999999999998,1.0],[-1.0,7.731127561720213e-17],[-0.5000000000000004,-1.0],[0.5000000000000001,-1.0]]},"octagon":{"t":"p","v":[[0.9999999999999998,0.41421356237309515],[0.41421356237309503,1.0],[-0.4142135623730949,1.0],[-0.9999999999999998,0.41421356237309526],[-1.0,-0.4142135623730949],[-0.4142135623730947,-1.0],[0.41421356237309526,-0.9999999999999998],[1.0,-0.41421356237309476]]},"pentagon":{"t":"p","v":[[1.2275137091053271e-16,-0.9999999999999999],[1.0,-0.23606797749978967],[0.6180339887498948,0.9999999999999999],[-0.6180339887498946,0.9999999999999999],[-1.0,-0.23606797749978953]]},"cylinder":{"t":"r","r":0}},"nodes":[{"k":"n0","id":"AB","label":"AB","x":55.16,"y":174.01,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"AB","label":"AB","degree":2,"attrs":{"name":"Art Building & Art Parkade","kind":"arts","lat":51.075439,"lon":-114.1301486,"betweenness":0.0}},"g":"arts"},{"k":"n1","id":"AD","label":"AD","x":189.38,"y":-18.62,"w":29.96,"h":29.96,"shape":"circle","tip":{"id":"AD","label":"AD","degree":2,"attrs":{"name":"Administration Building","kind":"administration","lat":51.0781552,"lon":-114.1271352,"betweenness":0.2033670033670034}},"g":"administration"},{"k":"n2","id":"AU","label":"AU","x":-118.41,"y":212.53,"w":22.5,"h":22.5,"shape":"circle","tip":{"id":"AU","label":"AU","degree":3,"attrs":{"name":"Aurora Hall","kind":"residence","lat":51.0748957,"lon":-114.1340445,"betweenness":0.10841750841750843}},"g":"residence"},{"k":"n3","id":"BI","label":"BI","x":256.71,"y":-144.81,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"BI","label":"BI","degree":2,"attrs":{"name":"Biological Sciences","kind":"academic","lat":51.0799355,"lon":-114.125624,"betweenness":0.0}},"g":"academic"},{"k":"n4","id":"CC","label":"CC","x":307.22,"y":-32.33,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"CC","label":"CC","degree":2,"attrs":{"name":"Child Care Centre","kind":"services","lat":51.0783487,"lon":-114.1244905,"betweenness":0.0}},"g":"services"},{"k":"n5","id":"CCIT","label":"CCIT","x":-89.14,"y":-169.42,"w":15.21,"h":15.21,"shape":"circle","tip":{"id":"CCIT","label":"CCIT","degree":2,"attrs":{"name":"Calgary Centre for Innovative Technology","kind":"research","lat":51.0802822,"lon":-114.1333883,"betweenness":0.041750841750841754}},"g":"research"},{"k":"n6","id":"CD","label":"CD","x":-269.66,"y":131.8,"w":19.38,"h":19.38,"shape":"circle","tip":{"id":"CD","label":"CD","degree":4,"attrs":{"name":"Cascade Hall","kind":"residence","lat":51.0760344,"lon":-114.1374401,"betweenness":0.07676767676767678}},"g":"residence"},{"k":"n7","id":"CDC","label":"CDC","x":-561.25,"y":222.73,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"CDC","label":"CDC","degree":1,"attrs":{"name":"Child Development Centre","kind":"research","lat":51.0747518,"lon":-114.1439864,"betweenness":0.0}},"g":"research"},{"k":"n8","id":"CH","label":"CH","x":66.89,"y":84.74,"w":29.59,"h":29.59,"shape":"circle","tip":{"id":"CH","label":"CH","degree":4,"attrs":{"name":"Craigie Hall (incl. University Theatre)","kind":"arts","lat":51.076698,"lon":-114.1298854,"betweenness":0.19797979797979798}},"g":"arts"},{"k":"n9","id":"CR","label":"CR","x":-157.12,"y":-90.04,"w":27.95,"h":27.95,"shape":"circle","tip":{"id":"CR","label":"CR","degree":3,"attrs":{"name":"Crowsnest Hall","kind":"residence","lat":51.0791631,"lon":-114.134913,"betweenness":0.1750841750841751}},"g":"residence"},{"k":"n10","id":"CSSH","label":"CSSH","x":-101.26,"y":-132.18,"w":26.47,"h":26.47,"shape":"circle","tip":{"id":"CSSH","label":"CSSH","degree":4,"attrs":{"name":"Cenovus Spo'pi Solar House","kind":"research","lat":51.079757,"lon":-114.1336589,"betweenness":0.15555555555555556}},"g":"research"},{"k":"n11","id":"DC","label":"DC","x":-92.68,"y":145.45,"w":26.47,"h":26.47,"shape":"circle","tip":{"id":"DC","label":"DC","degree":4,"attrs":{"name":"Dining Centre","kind":"student-life","lat":51.0758412,"lon":-114.1334087,"betweenness":0.15555555555555556}},"g":"student-life"},{"k":"n12","id":"EDC","label":"EDC","x":214.5,"y":83.21,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"EDC","label":"EDC","degree":2,"attrs":{"name":"Education Classrooms","kind":"academic","lat":51.076719,"lon":-114.1265704,"betweenness":0.0}},"g":"academic"},{"k":"n13","id":"EDT","label":"EDT","x":233.38,"y":60.0,"w":25.01,"h":25.01,"shape":"circle","tip":{"id":"EDT","label":"EDT","degree":4,"attrs":{"name":"Education Tower","kind":"academic","lat":51.0770464,"lon":-114.1261475,"betweenness":0.13737373737373737}},"g":"academic"},{"k":"n14","id":"EEEL","label":"EEEL","x":86.53,"y":-225.98,"w":11.47,"h":11.47,"shape":"circle","tip":{"id":"EEEL","label":"EEEL","degree":3,"attrs":{"name":"Energy Environment Experiential Learning","kind":"academic","lat":51.0810803,"lon":-114.1294433,"betweenness":0.017508417508417508}},"g":"academic"},{"k":"n15","id":"ENA","label":"ENA","x":-0.63,"y":-167.83,"w":25.78,"h":25.78,"shape":"circle","tip":{"id":"ENA","label":"ENA","degree":3,"attrs":{"name":"Engineering Block A","kind":"academic","lat":51.08026,"lon":-114.1314689,"betweenness":0.14680134680134682}},"g":"academic"},{"k":"n16","id":"ENB","label":"ENB","x":-6.19,"y":-198.24,"w":11.34,"h":11.34,"shape":"circle","tip":{"id":"ENB","label":"ENB","degree":2,"attrs":{"name":"Engineering Block B","kind":"academic","lat":51.0806885,"lon":-114.1315246,"betweenness":0.016835016835016835}},"g":"academic"},{"k":"n17","id":"ENC","label":"ENC","x":-20.79,"y":-212.78,"w":11.82,"h":11.82,"shape":"circle","tip":{"id":"ENC","label":"ENC","degree":3,"attrs":{"name":"Engineering Block C","kind":"academic","lat":51.0808937,"lon":-114.1318533,"betweenness":0.01952861952861953}},"g":"academic"},{"k":"n18","id":"END","label":"END","x":-54.45,"y":-187.66,"w":16.52,"h":16.52,"shape":"circle","tip":{"id":"END","label":"END","degree":4,"attrs":{"name":"Engineering Block D","kind":"academic","lat":51.0805397,"lon":-114.132609,"betweenness":0.05185185185185186}},"g":"academic"},{"k":"n19","id":"ENE","label":"ENE","x":-53.6,"y":-148.12,"w":21.36,"h":21.36,"shape":"circle","tip":{"id":"ENE","label":"ENE","degree":4,"attrs":{"name":"Engineering Block E","kind":"academic","lat":51.0799823,"lon":-114.1325147,"betweenness":0.0962962962962963}},"g":"academic"},{"k":"n20","id":"ENF","label":"ENF","x":-52.61,"y":-108.85,"w":12.62,"h":12.62,"shape":"circle","tip":{"id":"ENF","label":"ENF","degree":3,"attrs":{"name":"Engineering Block F","kind":"academic","lat":51.0794276,"lon":-114.1325667,"betweenness":0.024242424242424242}},"g":"academic"},{"k":"n21","id":"ENG","label":"ENG","x":-28.22,"y":-166.87,"w":23.41,"h":23.41,"shape":"circle","tip":{"id":"ENG","label":"ENG","degree":3,"attrs":{"name":"Engineering Block G","kind":"academic","lat":51.0802465,"lon":-114.1320257,"betweenness":0.11851851851851852}},"g":"academic"},{"k":"n22","id":"ES","label":"ES","x":102.15,"y":-163.36,"w":29.4,"h":29.4,"shape":"circle","tip":{"id":"ES","label":"ES","degree":5,"attrs":{"name":"Earth Sciences","kind":"academic","lat":51.0801969,"lon":-114.1290929,"betweenness":0.19528619528619529}},"g":"academic"},{"k":"n23","id":"GL","label":"GL","x":-202.13,"y":159.79,"w":16.44,"h":16.44,"shape":"circle","tip":{"id":"GL","label":"GL","degree":4,"attrs":{"name":"Glacier Hall","kind":"residence","lat":51.0756389,"lon":-114.135924,"betweenness":0.051178451178451184}},"g":"residence"},{"k":"n24","id":"GR","label":"GR","x":-414.91,"y":-114.39,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"GR","label":"GR","degree":1,"attrs":{"name":"Grounds Building","kind":"services","lat":51.0795063,"lon":-114.1407015,"betweenness":0.0}},"g":"services"},{"k":"n25","id":"HNSC","label":"HNSC","x":105.91,"y":-4.78,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"HNSC","label":"HNSC","degree":3,"attrs":{"name":"Hunter Student Commons","kind":"student-life","lat":51.0779603,"lon":-114.129009,"betweenness":0.0}},"g":"student-life"},{"k":"n26","id":"HP","label":"HP","x":-329.98,"y":206.15,"w":18.8,"h":18.8,"shape":"circle","tip":{"id":"HP","label":"HP","degree":3,"attrs":{"name":"Central Heating and Cooling Plant","kind":"services","lat":51.0749855,"lon":-114.1387945,"betweenness":0.07138047138047138}},"g":"services"},{"k":"n27","id":"ICT","label":"ICT","x":46.29,"y":-163.68,"w":23.99,"h":23.99,"shape":"circle","tip":{"id":"ICT","label":"ICT","degree":3,"attrs":{"name":"Information and Communications Technology","kind":"academic","lat":51.0802016,"lon":-114.1303466,"betweenness":0.12525252525252525}},"g":"academic"},{"k":"n28","id":"IH","label":"IH","x":-60.99,"y":123.45,"w":30.92,"h":30.92,"shape":"circle","tip":{"id":"IH","label":"IH","degree":3,"attrs":{"name":"International House","kind":"residence","lat":51.0761521,"lon":-114.1328137,"betweenness":0.2175084175084175}},"g":"residence"},{"k":"n29","id":"KA","label":"KA","x":-153.42,"y":181.47,"w":21.55,"h":21.55,"shape":"circle","tip":{"id":"KA","label":"KA","degree":3,"attrs":{"name":"Kananaskis Hall","kind":"residence","lat":51.0753335,"lon":-114.1348307,"betweenness":0.09831649831649832}},"g":"residence"},{"k":"n30","id":"KNA","label":"KNA","x":-69.57,"y":57.01,"w":25.4,"h":25.4,"shape":"circle","tip":{"id":"KNA","label":"KNA","degree":3,"attrs":{"name":"Dr. Roger Jackson Kinesiology Complex (Block A)","kind":"athletics","lat":51.0770887,"lon":-114.1329486,"betweenness":0.1420875420875421}},"g":"athletics"},{"k":"n31","id":"KNB","label":"KNB","x":-105.98,"y":-6.06,"w":36.06,"h":36.06,"shape":"circle","tip":{"id":"KNB","label":"KNB","degree":4,"attrs":{"name":"Dr. Roger Jackson Kinesiology Complex (Block B)","kind":"athletics","lat":51.0779782,"lon":-114.1337659,"betweenness":0.301010101010101}},"g":"athletics"},{"k":"n32","id":"MEB","label":"MEB","x":47.31,"y":-314.23,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"MEB","label":"MEB","degree":2,"attrs":{"name":"Mechanical Engineering Building","kind":"academic","lat":51.0823251,"lon":-114.1303243,"betweenness":0.0}},"g":"academic"},{"k":"n33","id":"MFH","label":"MFH","x":130.08,"y":56.37,"w":30.24,"h":30.24,"shape":"circle","tip":{"id":"MFH","label":"MFH","degree":4,"attrs":{"name":"Murray Fraser Hall","kind":"academic","lat":51.0770978,"lon":-114.1284669,"betweenness":0.20740740740740743}},"g":"academic"},{"k":"n34","id":"MH","label":"MH","x":41.7,"y":-47.89,"w":23.7,"h":23.7,"shape":"circle","tip":{"id":"MH","label":"MH","degree":3,"attrs":{"name":"MacEwan Hall","kind":"student-life","lat":51.0785683,"lon":-114.1304506,"betweenness":0.12188552188552189}},"g":"student-life"},{"k":"n35","id":"MS","label":"MS","x":157.13,"y":-148.57,"w":25.99,"h":25.99,"shape":"circle","tip":{"id":"MS","label":"MS","degree":3,"attrs":{"name":"Mathematical Sciences","kind":"academic","lat":51.0799885,"lon":-114.1278401,"betweenness":0.14949494949494951}},"g":"academic"},{"k":"n36","id":"MSC","label":"MSC","x":-14.22,"y":-20.85,"w":22.5,"h":22.5,"shape":"circle","tip":{"id":"MSC","label":"MSC","degree":3,"attrs":{"name":"MacEwan Student Centre","kind":"student-life","lat":51.0781866,"lon":-114.131706,"betweenness":0.10841750841750843}},"g":"student-life"},{"k":"n37","id":"MT","label":"MT","x":111.78,"y":29.2,"w":11.47,"h":11.47,"shape":"circle","tip":{"id":"MT","label":"MT","degree":3,"attrs":{"name":"MacKimmie Tower","kind":"administration","lat":51.0774806,"lon":-114.1288766,"betweenness":0.017508417508417508}},"g":"administration"},{"k":"n38","id":"MTH","label":"MTH","x":297.72,"y":80.09,"w":14.46,"h":14.46,"shape":"circle","tip":{"id":"MTH","label":"MTH","degree":4,"attrs":{"name":"Mathison Hall","kind":"academic","lat":51.0767635,"lon":-114.1247034,"betweenness":0.03636363636363637}},"g":"academic"},{"k":"n39","id":"OL","label":"OL","x":-196.08,"y":204.24,"w":17.26,"h":17.26,"shape":"circle","tip":{"id":"OL","label":"OL","degree":3,"attrs":{"name":"Olympus Hall","kind":"residence","lat":51.0750126,"lon":-114.1357886,"betweenness":0.057912457912457915}},"g":"residence"},{"k":"n40","id":"OO","label":"OO","x":-189.7,"y":62.55,"w":25.29,"h":25.29,"shape":"circle","tip":{"id":"OO","label":"OO","degree":3,"attrs":{"name":"Olympic Oval","kind":"athletics","lat":51.0770105,"lon":-114.1356452,"betweenness":0.14074074074074075}},"g":"athletics"},{"k":"n41","id":"OVC","label":"OVC","x":409.3,"y":463.44,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"OVC","label":"OVC","degree":1,"attrs":{"name":"Olympic Volunteer Centre","kind":"services","lat":51.0713569,"lon":-114.1221974,"betweenness":0.0}},"g":"services"},{"k":"n42","id":"PF","label":"PF","x":197.92,"y":35.39,"w":36.4,"h":36.4,"shape":"circle","tip":{"id":"PF","label":"PF","degree":4,"attrs":{"name":"Professional Faculties","kind":"academic","lat":51.077394,"lon":-114.1269438,"betweenness":0.3070707070707071}},"g":"academic"},{"k":"n43","id":"PP","label":"PP","x":-529.5,"y":195.12,"w":14.46,"h":14.46,"shape":"circle","tip":{"id":"PP","label":"PP","degree":2,"attrs":{"name":"Physical Plant","kind":"services","lat":51.0751413,"lon":-114.1432734,"betweenness":0.03636363636363637}},"g":"services"},{"k":"n44","id":"RC","label":"RC","x":-6.79,"y":107.51,"w":30.37,"h":30.37,"shape":"circle","tip":{"id":"RC","label":"RC","degree":2,"attrs":{"name":"Rozsa Centre","kind":"arts","lat":51.0763766,"lon":-114.131524,"betweenness":0.20942760942760943}},"g":"arts"},{"k":"n45","id":"RT","label":"RT","x":26.43,"y":114.27,"w":30.05,"h":30.05,"shape":"circle","tip":{"id":"RT","label":"RT","degree":3,"attrs":{"name":"Reeve Theatre","kind":"arts","lat":51.0762811,"lon":-114.1308076,"betweenness":0.20471380471380474}},"g":"arts"},{"k":"n46","id":"RU","label":"RU","x":-60.7,"y":201.24,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"RU","label":"RU","degree":2,"attrs":{"name":"Rundle Hall","kind":"residence","lat":51.0750549,"lon":-114.1327499,"betweenness":0.0}},"g":"residence"},{"k":"n47","id":"SA","label":"SA","x":142.26,"y":-88.12,"w":18.5,"h":18.5,"shape":"circle","tip":{"id":"SA","label":"SA","degree":3,"attrs":{"name":"Science A","kind":"academic","lat":51.079136,"lon":-114.1281934,"betweenness":0.06868686868686869}},"g":"academic"},{"k":"n48","id":"SB","label":"SB","x":87.42,"y":-110.18,"w":24.34,"h":24.34,"shape":"circle","tip":{"id":"SB","label":"SB","degree":3,"attrs":{"name":"Science B","kind":"academic","lat":51.0794473,"lon":-114.1294246,"betweenness":0.1292929292929293}},"g":"academic"},{"k":"n49","id":"SH","label":"SH","x":293.76,"y":36.92,"w":14.27,"h":14.27,"shape":"circle","tip":{"id":"SH","label":"SH","degree":3,"attrs":{"name":"Scurfield Hall","kind":"academic","lat":51.0773722,"lon":-114.1247919,"betweenness":0.035016835016835016}},"g":"academic"},{"k":"n50","id":"SS","label":"SS","x":194.74,"y":-87.8,"w":30.24,"h":30.24,"shape":"circle","tip":{"id":"SS","label":"SS","degree":4,"attrs":{"name":"Social Sciences","kind":"academic","lat":51.0791313,"lon":-114.1270143,"betweenness":0.20740740740740743}},"g":"academic"},{"k":"n51","id":"ST","label":"ST","x":186.62,"y":-124.21,"w":26.99,"h":26.99,"shape":"circle","tip":{"id":"ST","label":"ST","degree":4,"attrs":{"name":"Science Theatres","kind":"academic","lat":51.0796444,"lon":-114.1272154,"betweenness":0.1622895622895623}},"g":"academic"},{"k":"n52","id":"TFDL","label":"TFDL","x":63.0,"y":33.03,"w":13.67,"h":13.67,"shape":"circle","tip":{"id":"TFDL","label":"TFDL","degree":3,"attrs":{"name":"Taylor Family Digital Library","kind":"library","lat":51.0774272,"lon":-114.1299715,"betweenness":0.030976430976430977}},"g":"library"},{"k":"n53","id":"TI","label":"TI","x":5.48,"y":-86.85,"w":13.05,"h":13.05,"shape":"circle","tip":{"id":"TI","label":"TI","degree":3,"attrs":{"name":"Taylor Institute for Teaching and Learning","kind":"academic","lat":51.079118,"lon":-114.131263,"betweenness":0.02693602693602694}},"g":"academic"},{"k":"n54","id":"TRB","label":"TRB","x":145.13,"y":-171.4,"w":7.7,"h":7.7,"shape":"circle","tip":{"id":"TRB","label":"TRB","degree":2,"attrs":{"name":"Trailer B (Mathematical Science)","kind":"academic","lat":51.0803101,"lon":-114.1281285,"betweenness":0.0}},"g":"academic"},{"k":"n55","id":"YA","label":"YA","x":-261.94,"y":194.61,"w":15.57,"h":15.57,"shape":"circle","tip":{"id":"YA","label":"YA","degree":3,"attrs":{"name":"Yamnuska Hall","kind":"residence","lat":51.0751478,"lon":-114.1372662,"betweenness":0.044444444444444446}},"g":"residence"}],"edges":[{"k":"e0","u":"n0","v":"n8","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AB","target":"CH","attrs":{"kind":"pedway","length":141.2,"weight":141.2}}},{"k":"e1","u":"n0","v":"n45","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AB","target":"RT","attrs":{"kind":"outdoor","length":104.3,"weight":104.3}}},{"k":"e2","u":"n1","v":"n42","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AD","target":"PF","attrs":{"kind":"attached","length":85.7,"weight":85.7}}},{"k":"e3","u":"n1","v":"n50","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AD","target":"SS","attrs":{"kind":"pedway","length":108.9,"weight":108.9}}},{"k":"e4","u":"n2","v":"n11","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AU","target":"DC","attrs":{"kind":"tunnel","length":114.1,"weight":114.1}}},{"k":"e5","u":"n2","v":"n29","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AU","target":"KA","attrs":{"kind":"outdoor","length":73.4,"weight":73.4}}},{"k":"e6","u":"n2","v":"n46","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"AU","target":"RU","attrs":{"kind":"outdoor","length":92.2,"weight":92.2}}},{"k":"e7","u":"n3","v":"n50","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"BI","target":"SS","attrs":{"kind":"outdoor","length":132.0,"weight":132.0}}},{"k":"e8","u":"n3","v":"n51","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"BI","target":"ST","attrs":{"kind":"pedway","length":115.8,"weight":115.8}}},{"k":"e9","u":"n4","v":"n38","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CC","target":"MTH","attrs":{"kind":"outdoor","length":176.9,"weight":176.9}}},{"k":"e10","u":"n4","v":"n49","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CC","target":"SH","attrs":{"kind":"outdoor","length":110.6,"weight":110.6}}},{"k":"e11","u":"n5","v":"n10","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CCIT","target":"CSSH","attrs":{"kind":"outdoor","length":61.4,"weight":61.4}}},{"k":"e12","u":"n5","v":"n18","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CCIT","target":"END","attrs":{"kind":"attached","length":61.5,"weight":61.5}}},{"k":"e13","u":"n6","v":"n23","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CD","target":"GL","attrs":{"kind":"outdoor","length":114.7,"weight":114.7}}},{"k":"e14","u":"n6","v":"n26","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CD","target":"HP","attrs":{"kind":"outdoor","length":150.2,"weight":150.2}}},{"k":"e15","u":"n6","v":"n40","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CD","target":"OO","attrs":{"kind":"outdoor","length":165.8,"weight":165.8}}},{"k":"e16","u":"n6","v":"n55","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CD","target":"YA","attrs":{"kind":"outdoor","length":99.3,"weight":99.3}}},{"k":"e17","u":"n7","v":"n43","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CDC","target":"PP","attrs":{"kind":"outdoor","length":66.0,"weight":66.0}}},{"k":"e18","u":"n8","v":"n33","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CH","target":"MFH","attrs":{"kind":"pedway","length":108.6,"weight":108.6}}},{"k":"e19","u":"n8","v":"n45","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CH","target":"RT","attrs":{"kind":"attached","length":79.4,"weight":79.4}}},{"k":"e20","u":"n8","v":"n52","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CH","target":"TFDL","attrs":{"kind":"outdoor","length":81.3,"weight":81.3}}},{"k":"e21","u":"n9","v":"n10","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CR","target":"CSSH","attrs":{"kind":"outdoor","length":109.7,"weight":109.7}}},{"k":"e22","u":"n9","v":"n24","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CR","target":"GR","attrs":{"kind":"outdoor","length":406.2,"weight":406.2}}},{"k":"e23","u":"n9","v":"n31","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CR","target":"KNB","attrs":{"kind":"outdoor","length":154.2,"weight":154.2}}},{"k":"e24","u":"n10","v":"n19","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CSSH","target":"ENE","attrs":{"kind":"outdoor","length":83.8,"weight":83.8}}},{"k":"e25","u":"n10","v":"n20","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"CSSH","target":"ENF","attrs":{"kind":"outdoor","length":84.6,"weight":84.6}}},{"k":"e26","u":"n11","v":"n28","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"DC","target":"IH","attrs":{"kind":"attached","length":54.1,"weight":54.1}}},{"k":"e27","u":"n11","v":"n30","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"DC","target":"KNA","attrs":{"kind":"tunnel","length":142.4,"weight":142.4}}},{"k":"e28","u":"n11","v":"n46","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"DC","target":"RU","attrs":{"kind":"outdoor","length":98.8,"weight":98.8}}},{"k":"e29","u":"n12","v":"n13","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EDC","target":"EDT","attrs":{"kind":"attached","length":46.9,"weight":46.9}}},{"k":"e30","u":"n12","v":"n42","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EDC","target":"PF","attrs":{"kind":"pedway","length":79.5,"weight":79.5}}},{"k":"e31","u":"n13","v":"n38","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EDT","target":"MTH","attrs":{"kind":"outdoor","length":105.7,"weight":105.7}}},{"k":"e32","u":"n13","v":"n42","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EDT","target":"PF","attrs":{"kind":"outdoor","length":67.7,"weight":67.7}}},{"k":"e33","u":"n13","v":"n49","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EDT","target":"SH","attrs":{"kind":"pedway","length":101.4,"weight":101.4}}},{"k":"e34","u":"n14","v":"n22","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EEEL","target":"ES","attrs":{"kind":"outdoor","length":101.2,"weight":101.2}}},{"k":"e35","u":"n14","v":"n27","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EEEL","target":"ICT","attrs":{"kind":"outdoor","length":116.3,"weight":116.3}}},{"k":"e36","u":"n14","v":"n32","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"EEEL","target":"MEB","attrs":{"kind":"outdoor","length":151.5,"weight":151.5}}},{"k":"e37","u":"n15","v":"n16","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENA","target":"ENB","attrs":{"kind":"attached","length":47.8,"weight":47.8}}},{"k":"e38","u":"n15","v":"n21","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENA","target":"ENG","attrs":{"kind":"attached","length":38.9,"weight":38.9}}},{"k":"e39","u":"n15","v":"n27","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENA","target":"ICT","attrs":{"kind":"attached","length":78.7,"weight":78.7}}},{"k":"e40","u":"n16","v":"n17","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENB","target":"ENC","attrs":{"kind":"attached","length":32.4,"weight":32.4}}},{"k":"e41","u":"n17","v":"n18","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENC","target":"END","attrs":{"kind":"outdoor","length":65.8,"weight":65.8}}},{"k":"e42","u":"n17","v":"n32","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENC","target":"MEB","attrs":{"kind":"outdoor","length":191.7,"weight":191.7}}},{"k":"e43","u":"n18","v":"n19","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"END","target":"ENE","attrs":{"kind":"attached","length":62.3,"weight":62.3}}},{"k":"e44","u":"n18","v":"n21","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"END","target":"ENG","attrs":{"kind":"attached","length":52.2,"weight":52.2}}},{"k":"e45","u":"n19","v":"n20","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENE","target":"ENF","attrs":{"kind":"attached","length":61.8,"weight":61.8}}},{"k":"e46","u":"n19","v":"n21","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENE","target":"ENG","attrs":{"kind":"attached","length":45.1,"weight":45.1}}},{"k":"e47","u":"n20","v":"n53","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ENF","target":"TI","attrs":{"kind":"outdoor","length":97.4,"weight":97.4}}},{"k":"e48","u":"n22","v":"n27","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ES","target":"ICT","attrs":{"kind":"attached","length":87.6,"weight":87.6}}},{"k":"e49","u":"n22","v":"n35","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ES","target":"MS","attrs":{"kind":"pedway","length":90.5,"weight":90.5}}},{"k":"e50","u":"n22","v":"n48","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ES","target":"SB","attrs":{"kind":"attached","length":86.5,"weight":86.5}}},{"k":"e51","u":"n22","v":"n54","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"ES","target":"TRB","attrs":{"kind":"outdoor","length":68.5,"weight":68.5}}},{"k":"e52","u":"n23","v":"n29","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"GL","target":"KA","attrs":{"kind":"outdoor","length":83.6,"weight":83.6}}},{"k":"e53","u":"n23","v":"n39","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"GL","target":"OL","attrs":{"kind":"outdoor","length":70.3,"weight":70.3}}},{"k":"e54","u":"n23","v":"n40","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"GL","target":"OO","attrs":{"kind":"outdoor","length":153.8,"weight":153.8}}},{"k":"e55","u":"n25","v":"n33","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"HNSC","target":"MFH","attrs":{"kind":"outdoor","length":103.1,"weight":103.1}}},{"k":"e56","u":"n25","v":"n37","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"HNSC","target":"MT","attrs":{"kind":"attached","length":54.1,"weight":54.1}}},{"k":"e57","u":"n25","v":"n52","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"HNSC","target":"TFDL","attrs":{"kind":"pedway","length":89.6,"weight":89.6}}},{"k":"e58","u":"n26","v":"n43","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"HP","target":"PP","attrs":{"kind":"outdoor","length":313.4,"weight":313.4}}},{"k":"e59","u":"n26","v":"n55","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"HP","target":"YA","attrs":{"kind":"outdoor","length":108.3,"weight":108.3}}},{"k":"e60","u":"n28","v":"n30","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"IH","target":"KNA","attrs":{"kind":"outdoor","length":104.6,"weight":104.6}}},{"k":"e61","u":"n28","v":"n44","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"IH","target":"RC","attrs":{"kind":"outdoor","length":93.5,"weight":93.5}}},{"k":"e62","u":"n29","v":"n39","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"KA","target":"OL","attrs":{"kind":"outdoor","length":75.8,"weight":75.8}}},{"k":"e63","u":"n30","v":"n31","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"KNA","target":"KNB","attrs":{"kind":"attached","length":114.2,"weight":114.2}}},{"k":"e64","u":"n31","v":"n36","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"KNB","target":"MSC","attrs":{"kind":"pedway","length":145.8,"weight":145.8}}},{"k":"e65","u":"n31","v":"n40","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"KNB","target":"OO","attrs":{"kind":"attached","length":169.8,"weight":169.8}}},{"k":"e66","u":"n33","v":"n37","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MFH","target":"MT","attrs":{"kind":"attached","length":51.3,"weight":51.3}}},{"k":"e67","u":"n33","v":"n42","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MFH","target":"PF","attrs":{"kind":"pedway","length":111.4,"weight":111.4}}},{"k":"e68","u":"n34","v":"n36","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MH","target":"MSC","attrs":{"kind":"attached","length":97.4,"weight":97.4}}},{"k":"e69","u":"n34","v":"n48","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MH","target":"SB","attrs":{"kind":"tunnel","length":121.2,"weight":121.2}}},{"k":"e70","u":"n34","v":"n53","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MH","target":"TI","attrs":{"kind":"outdoor","length":83.4,"weight":83.4}}},{"k":"e71","u":"n35","v":"n51","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MS","target":"ST","attrs":{"kind":"attached","length":58.0,"weight":58.0}}},{"k":"e72","u":"n35","v":"n54","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MS","target":"TRB","attrs":{"kind":"outdoor","length":41.0,"weight":41.0}}},{"k":"e73","u":"n36","v":"n53","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MSC","target":"TI","attrs":{"kind":"outdoor","length":108.1,"weight":108.1}}},{"k":"e74","u":"n37","v":"n52","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MT","target":"TFDL","attrs":{"kind":"outdoor","length":76.7,"weight":76.7}}},{"k":"e75","u":"n38","v":"n41","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MTH","target":"OVC","attrs":{"kind":"outdoor","length":626.2,"weight":626.2}}},{"k":"e76","u":"n38","v":"n49","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"MTH","target":"SH","attrs":{"kind":"pedway","length":68.0,"weight":68.0}}},{"k":"e77","u":"n39","v":"n55","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"OL","target":"YA","attrs":{"kind":"outdoor","length":104.3,"weight":104.3}}},{"k":"e78","u":"n44","v":"n45","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"RC","target":"RT","attrs":{"kind":"attached","length":51.2,"weight":51.2}}},{"k":"e79","u":"n47","v":"n48","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"SA","target":"SB","attrs":{"kind":"attached","length":92.7,"weight":92.7}}},{"k":"e80","u":"n47","v":"n50","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"SA","target":"SS","attrs":{"kind":"attached","length":82.4,"weight":82.4}}},{"k":"e81","u":"n47","v":"n51","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"SA","target":"ST","attrs":{"kind":"attached","length":88.7,"weight":88.7}}},{"k":"e82","u":"n50","v":"n51","style":"straight","curv":0.16,"al":0.0,"tip":{"source":"SS","target":"ST","attrs":{"kind":"attached","length":58.8,"weight":58.8}}}]}</script></div></div><script>/* AryaGraph interactive runtime (no dependencies). Initialises every .ag-app on the page. */
+(function () {
+  "use strict";
+
+  // ------------------------------------------------------------------ geometry
+  function lerp(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; }
+  function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+  function pointAt(s, t) {
+    var u = 1 - t, a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t;
+    return [a * s[0][0] + b * s[1][0] + c * s[2][0] + d * s[3][0], a * s[0][1] + b * s[1][1] + c * s[2][1] + d * s[3][1]];
+  }
+  function tangentAt(s, t) {
+    var u = 1 - t;
+    var dx = 3 * u * u * (s[1][0] - s[0][0]) + 6 * u * t * (s[2][0] - s[1][0]) + 3 * t * t * (s[3][0] - s[2][0]);
+    var dy = 3 * u * u * (s[1][1] - s[0][1]) + 6 * u * t * (s[2][1] - s[1][1]) + 3 * t * t * (s[3][1] - s[2][1]);
+    var n = Math.hypot(dx, dy);
+    if (n < 1e-9) { dx = s[3][0] - s[0][0]; dy = s[3][1] - s[0][1]; n = Math.hypot(dx, dy) || 1; }
+    return [dx / n, dy / n];
+  }
+  function split(s, t) {
+    var a = lerp(s[0], s[1], t), b = lerp(s[1], s[2], t), c = lerp(s[2], s[3], t);
+    var d = lerp(a, b, t), e = lerp(b, c, t), f = lerp(d, e, t);
+    return [[s[0], a, d, f], [f, e, c, s[3]]];
+  }
+  function line(a, b) { return [a, lerp(a, b, 1 / 3), lerp(a, b, 2 / 3), b]; }
+  function quad(a, c, b) { return [a, lerp(a, c, 2 / 3), lerp(b, c, 2 / 3), b]; }
+  function fmt(v) { return (Math.round(v * 100) / 100).toString(); }
+  function toD(segs) {
+    if (!segs.length) return "";
+    var out = "M" + fmt(segs[0][0][0]) + "," + fmt(segs[0][0][1]);
+    segs.forEach(function (s) {
+      out += "C" + fmt(s[1][0]) + "," + fmt(s[1][1]) + " " + fmt(s[2][0]) + "," + fmt(s[2][1]) + " " + fmt(s[3][0]) + "," + fmt(s[3][1]);
+    });
+    return out;
+  }
+
+  function makeShapes(spec) {
+    function contains(n, x, y) {
+      var sp = spec[n.shape] || { t: "e" }, hw = n.w / 2, hh = n.h / 2, dx = x - n.x, dy = y - n.y;
+      if (sp.t === "e") return (dx / Math.max(hw, 1e-9)) * (dx / Math.max(hw, 1e-9)) + (dy / Math.max(hh, 1e-9)) * (dy / Math.max(hh, 1e-9)) <= 1;
+      if (sp.t === "r") {
+        var r = sp.r === null ? Math.min(hw, hh) : Math.min(sp.r, hw, hh);
+        var ax = Math.abs(dx), ay = Math.abs(dy);
+        if (ax > hw || ay > hh) return false;
+        if (ax <= hw - r || ay <= hh - r) return true;
+        return (ax - (hw - r)) * (ax - (hw - r)) + (ay - (hh - r)) * (ay - (hh - r)) <= r * r;
+      }
+      var v = sp.v, sign = 0;
+      for (var i = 0; i < v.length; i++) {
+        var x1 = n.x + v[i][0] * hw, y1 = n.y + v[i][1] * hh;
+        var j = (i + 1) % v.length, x2 = n.x + v[j][0] * hw, y2 = n.y + v[j][1] * hh;
+        var cr = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
+        if (Math.abs(cr) < 1e-12) continue;
+        var s = cr > 0 ? 1 : -1;
+        if (!sign) sign = s; else if (s !== sign) return false;
+      }
+      return true;
+    }
+    function boundary(n, tx, ty) {
+      var dx = tx - n.x, dy = ty - n.y, L = Math.hypot(dx, dy);
+      if (L < 1e-9) return [n.x, n.y];
+      var ux = dx / L, uy = dy / L, lo = 0, hi = Math.hypot(n.w, n.h);
+      for (var i = 0; i < 32; i++) {
+        var mid = (lo + hi) / 2;
+        if (contains(n, n.x + ux * mid, n.y + uy * mid)) lo = mid; else hi = mid;
+      }
+      return [n.x + ux * lo, n.y + uy * lo];
+    }
+    return { contains: contains, boundary: boundary };
+  }
+
+  function exitParam(seg, inside) {
+    var lo = 0, hi = null;
+    for (var k = 1; k <= 32; k++) { var t = k / 32; if (!inside(pointAt(seg, t))) { hi = t; break; } lo = t; }
+    if (hi === null) return 1;
+    for (var i = 0; i < 30; i++) { var m = (lo + hi) / 2; if (inside(pointAt(seg, m))) lo = m; else hi = m; }
+    return hi;
+  }
+  function trimEnd(segs, d) {
+    segs = segs.slice();
+    var end = segs[segs.length - 1][3];
+    while (segs.length) {
+      var s = segs[segs.length - 1], prev = 1;
+      for (var k = 47; k >= 0; k--) {
+        var t = k / 48;
+        if (dist(pointAt(s, t), end) >= d) {
+          var lo = t, hi = prev;
+          for (var i = 0; i < 28; i++) { var m = (lo + hi) / 2; if (dist(pointAt(s, m), end) >= d) lo = m; else hi = m; }
+          segs[segs.length - 1] = split(s, lo)[0];
+          return segs;
+        }
+        prev = t;
+      }
+      if (segs.length === 1) break;
+      segs.pop();
+    }
+    var tan = tangentAt(segs[segs.length - 1], 1), p = [end[0] - tan[0] * d, end[1] - tan[1] * d];
+    return [line(p, p)];
+  }
+  function arrowHead(tip, dir, len, wid) {
+    var bx = tip[0] - dir[0] * len, by = tip[1] - dir[1] * len, px = -dir[1] * wid / 2, py = dir[0] * wid / 2;
+    var back = [tip[0] - dir[0] * len * 0.78, tip[1] - dir[1] * len * 0.78];
+    return {
+      d: "M" + fmt(tip[0]) + "," + fmt(tip[1]) + "L" + fmt(bx + px) + "," + fmt(by + py) + "L" + fmt(back[0]) + "," + fmt(back[1]) +
+        "L" + fmt(bx - px) + "," + fmt(by - py) + "Z",
+      back: len * 0.78 + 0.3
+    };
+  }
+  function flowSegs(pts, axis) {
+    var segs = [];
+    for (var i = 0; i + 1 < pts.length; i++) {
+      var a = pts[i], b = pts[i + 1];
+      if (axis === "y") { var k = (b[1] - a[1]) * 0.5; segs.push([a, [a[0], a[1] + k], [b[0], b[1] - k], b]); }
+      else { var q = (b[0] - a[0]) * 0.5; segs.push([a, [a[0] + q, a[1]], [b[0] - q, b[1]], b]); }
+    }
+    return segs;
+  }
+  function orthoSegs(pts, axis) {
+    var c = [pts[0]];
+    for (var i = 0; i + 1 < pts.length; i++) {
+      var a = pts[i], b = pts[i + 1];
+      if (axis === "y") { var m = (a[1] + b[1]) / 2; c.push([a[0], m], [b[0], m], b); }
+      else { var mx = (a[0] + b[0]) / 2; c.push([mx, a[1]], [mx, b[1]], b); }
+    }
+    var segs = [];
+    for (var j = 0; j + 1 < c.length; j++) if (dist(c[j], c[j + 1]) > 1e-6) segs.push(line(c[j], c[j + 1]));
+    return segs.length ? segs : [line(c[0], c[0])];
+  }
+
+  // ------------------------------------------------------------------ helpers
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (text !== undefined && text !== null) e.textContent = String(text);
+    return e;
+  }
+  function fmtVal(v) {
+    if (v === null || v === undefined) return "n/a";
+    if (typeof v === "number") {
+      if (!isFinite(v)) return String(v);
+      if (Number.isInteger(v)) return v.toLocaleString();
+      var a = Math.abs(v);
+      if (a >= 1000) return Math.round(v).toLocaleString();
+      if (a >= 0.001) return Number(v.toPrecision(4)).toString();
+      return v.toExponential(2);
+    }
+    if (typeof v === "boolean") return v ? "true" : "false";
+    if (Array.isArray(v)) return v.map(fmtVal).join(", ");
+    if (typeof v === "object") return JSON.stringify(v);
+    return String(v);
+  }
+  function b64bytes(s) {
+    var bin = atob(s), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function download(name, blob) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  // ------------------------------------------------------------------ app
+  function init(app) {
+    var data = JSON.parse(app.querySelector("script.ag-data").textContent);
+    var stage = app.querySelector(".ag-stage");
+    var svg = stage.querySelector("svg");
+    var viewport = svg.querySelector(".ag-viewport");
+    var tip = stage.querySelector(".ag-tip");
+    var panel = stage.querySelector(".ag-panel");
+    var shapes = makeShapes(data.shapes);
+    var off = data.offset, W = data.size[0], H = data.size[1];
+
+    var nodes = new Map(), edges = [], adj = new Map(), inc = new Map();
+    var nodeEls = {}, lblEls = {}, edgeEls = {}, elblEls = {};
+    svg.querySelectorAll(".ag-n").forEach(function (e) { nodeEls[e.getAttribute("data-k")] = e; });
+    svg.querySelectorAll(".ag-l").forEach(function (e) { lblEls[e.getAttribute("data-k")] = e; });
+    svg.querySelectorAll(".ag-e").forEach(function (e) { edgeEls[e.getAttribute("data-k")] = e; });
+    svg.querySelectorAll(".ag-el").forEach(function (e) { elblEls[e.getAttribute("data-k")] = e; });
+    data.nodes.forEach(function (n, i) {
+      n.i = i; n.x0 = n.x; n.y0 = n.y; n.el = nodeEls[n.k]; n.lbl = lblEls[n.k];
+      nodes.set(n.k, n); adj.set(n.k, new Set()); inc.set(n.k, []);
+    });
+    data.edges.forEach(function (e, i) {
+      e.i = i; e.el = edgeEls[e.k]; e.lab = elblEls[e.k];
+      if (e.el) { e.pathEl = e.el.querySelector(".ag-edge"); e.arrowEl = e.el.querySelector(".ag-arrow"); }
+      edges.push(e);
+      adj.get(e.u).add(e.v); adj.get(e.v).add(e.u);
+      inc.get(e.u).push(e); if (e.v !== e.u) inc.get(e.v).push(e);
+    });
+
+    // ---------------------------------------------------------------- view
+    var view = { x: 0, y: 0, k: 1 };
+    function apply() { viewport.setAttribute("transform", "translate(" + fmt(view.x) + "," + fmt(view.y) + ") scale(" + view.k.toFixed(4) + ")"); }
+    function toSvg(ev) {
+      var p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+      return p.matrixTransform(svg.getScreenCTM().inverse());
+    }
+    function toContent(p) { return [(p.x - view.x) / view.k - off[0], (p.y - view.y) / view.k - off[1]]; }
+    function zoomAt(px, py, factor) {
+      var k = Math.min(Math.max(view.k * factor, 0.1), 40);
+      factor = k / view.k;
+      view.x = px - (px - view.x) * factor; view.y = py - (py - view.y) * factor; view.k = k; apply();
+    }
+    function fit() { view = { x: 0, y: 0, k: 1 }; apply(); }
+    function centerOn(n, k) {
+      view.k = Math.max(view.k, k || 1.8);
+      view.x = W / 2 - view.k * (n.x + off[0]); view.y = H / 2 - view.k * (n.y + off[1]); apply();
+    }
+
+    // ---------------------------------------------------------------- emphasis
+    var selected = null, groupOn = null;
+    function clearOn() { svg.querySelectorAll(".ag-on").forEach(function (e) { e.classList.remove("ag-on"); }); }
+    function focusNodes(keys) {
+      clearOn();
+      if (!keys) { svg.classList.remove("ag-focus"); return; }
+      svg.classList.add("ag-focus");
+      keys.forEach(function (k) { var n = nodes.get(k); if (n && n.el) n.el.classList.add("ag-on"); if (n && n.lbl) n.lbl.classList.add("ag-on"); });
+      edges.forEach(function (e) {
+        if (keys.has(e.u) && keys.has(e.v)) { if (e.el) e.el.classList.add("ag-on"); if (e.lab) e.lab.classList.add("ag-on"); }
+      });
+    }
+    function neighborhood(k) {
+      var s = new Set([k]); adj.get(k).forEach(function (x) { s.add(x); });
+      return s;
+    }
+    function focusNode(k) {
+      focusNodes(neighborhood(k));
+      inc.get(k).forEach(function (e) { if (e.el) e.el.classList.add("ag-on"); if (e.lab) e.lab.classList.add("ag-on"); });
+    }
+    function restore() {
+      if (selected) focusNode(selected);
+      else if (groupOn !== null) focusGroup(groupOn);
+      else focusNodes(null);
+    }
+
+    // ---------------------------------------------------------------- tooltip
+    function stateOf(n) {
+      if (!anim) return null;
+      var code = anim.frames[frame * anim.n + n.i];
+      if (anim.values) return anim.values[frame * anim.n + n.i];
+      return anim.states[code];
+    }
+    function tipRows(n) {
+      var rows = [];
+      var s = stateOf(n);
+      if (s !== null) rows.push([anim.values ? "value" : "state", s]);
+      var t = n.tip || {};
+      ["degree", "in", "out"].forEach(function (k) { if (k in t) rows.push([k, t[k]]); });
+      var at = t.attrs || {};
+      Object.keys(at).forEach(function (k) { rows.push([k, at[k]]); });
+      return rows;
+    }
+    function showTip(ev, title, rows) {
+      tip.textContent = "";
+      tip.appendChild(el("b", null, title));
+      if (rows.length) {
+        var dl = el("dl");
+        rows.slice(0, 14).forEach(function (r) { dl.appendChild(el("dt", null, r[0])); dl.appendChild(el("dd", null, fmtVal(r[1]))); });
+        tip.appendChild(dl);
+      }
+      tip.hidden = false;
+      moveTip(ev);
+    }
+    function moveTip(ev) {
+      if (tip.hidden) return;
+      var r = stage.getBoundingClientRect(), x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+      var w = tip.offsetWidth, h = tip.offsetHeight;
+      if (x + w > r.width - 6) x = ev.clientX - r.left - w - 14;
+      if (y + h > r.height - 6) y = ev.clientY - r.top - h - 14;
+      tip.style.left = Math.max(4, x) + "px"; tip.style.top = Math.max(4, y) + "px";
+    }
+    function hideTip() { tip.hidden = true; }
+
+    // ---------------------------------------------------------------- details panel
+    function openPanel(n) {
+      if (!panel) return;
+      panel.textContent = "";
+      var close = el("button", { class: "ag-close", "aria-label": "Close details" }, "×");
+      close.addEventListener("click", function () { select(null); });
+      panel.appendChild(close);
+      panel.appendChild(el("h3", null, n.label));
+      panel.appendChild(el("div", { class: "ag-sub" }, "id " + n.id));
+      var rows = tipRows(n);
+      if (rows.length) {
+        panel.appendChild(el("h4", null, "Attributes"));
+        var dl = el("dl");
+        rows.forEach(function (r) { dl.appendChild(el("dt", null, r[0])); dl.appendChild(el("dd", null, fmtVal(r[1]))); });
+        panel.appendChild(dl);
+      }
+      var nb = Array.from(adj.get(n.k)).filter(function (k) { return k !== n.k; });
+      panel.appendChild(el("h4", null, "Neighbors (" + nb.length + ")"));
+      var ul = el("ul");
+      nb.slice(0, 60).forEach(function (k) {
+        var m = nodes.get(k), li = el("li"), b = el("button", { type: "button" }, m.label);
+        b.addEventListener("click", function () { select(k); centerOn(m); });
+        li.appendChild(b); ul.appendChild(li);
+      });
+      panel.appendChild(ul);
+      panel.hidden = false;
+    }
+    function select(k) {
+      if (selected && nodes.get(selected).el) nodes.get(selected).el.classList.remove("ag-sel");
+      selected = k; groupOn = null;
+      if (k) { var n = nodes.get(k); if (n.el) n.el.classList.add("ag-sel"); openPanel(n); }
+      else if (panel) panel.hidden = true;
+      restore();
+    }
+
+    // ---------------------------------------------------------------- dragging
+    function updateEdge(e) {
+      if (!e.pathEl) return;
+      var U = nodes.get(e.u), V = nodes.get(e.v), segs, route = e.route || [];
+      if (e.u === e.v) {
+        e.el.setAttribute("transform", "translate(" + fmt(U.x - U.x0) + "," + fmt(U.y - U.y0) + ")");
+        return;
+      }
+      var inside = function (n) { return function (p) { return shapes.contains(n, p[0], p[1]); }; };
+      if (e.style === "flow" || e.style === "orthogonal") {
+        var ax = data.axis === "x" ? 0 : 1;
+        var first = route.length ? route[0] : [V.x, V.y], last = route.length ? route[route.length - 1] : [U.x, U.y];
+        var su = first[ax] >= (ax ? U.y : U.x) ? 1 : -1, sv = last[ax] >= (ax ? V.y : V.x) ? 1 : -1;
+        var pu = ax ? shapes.boundary(U, U.x, U.y + su * U.h) : shapes.boundary(U, U.x + su * U.w, U.y);
+        var pv = ax ? shapes.boundary(V, V.x, V.y + sv * V.h) : shapes.boundary(V, V.x + sv * V.w, V.y);
+        var pts = [pu].concat(route, [pv]);
+        segs = e.style === "flow" ? flowSegs(pts, data.axis) : orthoSegs(pts, data.axis);
+      } else if (e.style === "curved") {
+        var a = [U.x, U.y], b = [V.x, V.y], dx = b[0] - a[0], dy = b[1] - a[1], c = e.curv;
+        var ctrl = [(a[0] + b[0]) / 2 + dy * c * 2, (a[1] + b[1]) / 2 - dx * c * 2];
+        var s = quad(a, ctrl, b);
+        s = split(s, exitParam(s, inside(U)))[1];
+        var rev = [s[3], s[2], s[1], s[0]];
+        var t = exitParam(rev, inside(V));
+        segs = [split(s, 1 - t)[0]];
+      } else {
+        var aa = shapes.boundary(U, route.length ? route[0][0] : V.x, route.length ? route[0][1] : V.y);
+        var bb = shapes.boundary(V, route.length ? route[route.length - 1][0] : U.x, route.length ? route[route.length - 1][1] : U.y);
+        var all = [aa].concat(route, [bb]);
+        segs = [];
+        for (var i = 0; i + 1 < all.length; i++) segs.push(line(all[i], all[i + 1]));
+      }
+      if (e.al > 0 && e.arrowEl) {
+        segs = trimEnd(segs, 1.2);
+        var last2 = segs[segs.length - 1], tipP = last2[3], dir = tangentAt(last2, 1);
+        var ah = arrowHead(tipP, dir, e.al, e.al * 0.78);
+        segs = trimEnd(segs, ah.back);
+        e.arrowEl.setAttribute("d", ah.d);
+      }
+      e.pathEl.setAttribute("d", toD(segs));
+      if (e.lab) {
+        var len = e.pathEl.getTotalLength(), mp = e.pathEl.getPointAtLength(len / 2);
+        if (e.m0 === undefined) e.m0 = e.mid || [mp.x, mp.y];
+        e.lab.setAttribute("transform", "translate(" + fmt(mp.x - e.m0[0]) + "," + fmt(mp.y - e.m0[1]) + ")");
+      }
+    }
+    function moveNode(n, x, y) {
+      n.x = x; n.y = y;
+      var tr = "translate(" + fmt(x) + "," + fmt(y) + ")";
+      if (n.el) n.el.setAttribute("transform", tr);
+      if (n.lbl) n.lbl.setAttribute("transform", tr);
+      inc.get(n.k).forEach(updateEdge);
+    }
+
+    // ---------------------------------------------------------------- pointer input
+    var pointers = new Map(), drag = null, pinch = null;
+    svg.addEventListener("pointerdown", function (ev) {
+      if (ev.button !== 0 && ev.pointerType === "mouse") return;
+      svg.setPointerCapture(ev.pointerId);
+      pointers.set(ev.pointerId, [ev.clientX, ev.clientY]);
+      if (pointers.size === 2) {
+        var ps = Array.from(pointers.values());
+        pinch = { d: dist(ps[0], ps[1]), k: view.k };
+        drag = null; return;
+      }
+      var g = ev.target.closest && ev.target.closest(".ag-n");
+      var p = toSvg(ev);
+      drag = { node: g ? nodes.get(g.getAttribute("data-k")) : null, sx: ev.clientX, sy: ev.clientY, px: p.x, py: p.y, vx: view.x, vy: view.y, moved: false };
+      if (drag.node) { var c = toContent(p); drag.dx = drag.node.x - c[0]; drag.dy = drag.node.y - c[1]; }
+    });
+    svg.addEventListener("pointermove", function (ev) {
+      if (pointers.has(ev.pointerId)) pointers.set(ev.pointerId, [ev.clientX, ev.clientY]);
+      if (pinch && pointers.size === 2) {
+        var ps = Array.from(pointers.values()), d = dist(ps[0], ps[1]);
+        var mid = { clientX: (ps[0][0] + ps[1][0]) / 2, clientY: (ps[0][1] + ps[1][1]) / 2 }, p = toSvg(mid);
+        zoomAt(p.x, p.y, (pinch.k * d / pinch.d) / view.k); return;
+      }
+      if (!drag) { moveTip(ev); return; }
+      if (!drag.moved && Math.hypot(ev.clientX - drag.sx, ev.clientY - drag.sy) < 3) return;
+      drag.moved = true; hideTip();
+      var p2 = toSvg(ev);
+      if (drag.node) {
+        stage.classList.add("ag-dragging");
+        var c = toContent(p2); moveNode(drag.node, c[0] + drag.dx, c[1] + drag.dy);
+      } else {
+        stage.classList.add("ag-panning");
+        view.x = drag.vx + (p2.x - drag.px); view.y = drag.vy + (p2.y - drag.py); apply();
+      }
+    });
+    function endPointer(ev) {
+      pointers.delete(ev.pointerId);
+      if (pointers.size < 2) pinch = null;
+      if (!drag) return;
+      var d = drag; drag = null;
+      stage.classList.remove("ag-dragging", "ag-panning");
+      if (d.moved) return;
+      if (d.node) select(selected === d.node.k ? null : d.node.k);
+      else if (!ev.target.closest(".ag-legend")) { groupOn = null; select(null); }
+    }
+    svg.addEventListener("pointerup", endPointer);
+    svg.addEventListener("pointercancel", endPointer);
+    svg.addEventListener("wheel", function (ev) {
+      ev.preventDefault();
+      var p = toSvg(ev);
+      zoomAt(p.x, p.y, Math.exp(-ev.deltaY * (ev.deltaMode === 1 ? 0.05 : 0.0018)));
+    }, { passive: false });
+    svg.addEventListener("dblclick", function (ev) { if (!ev.target.closest(".ag-n")) fit(); });
+    svg.addEventListener("pointerover", function (ev) {
+      if (drag && drag.moved) return;
+      var g = ev.target.closest(".ag-n");
+      if (g) {
+        var n = nodes.get(g.getAttribute("data-k"));
+        if (!selected) focusNode(n.k);
+        showTip(ev, n.label, tipRows(n));
+        return;
+      }
+      var e = ev.target.closest(".ag-e");
+      if (e) {
+        var ed = edges[+e.getAttribute("data-k").slice(1)];
+        var rows = [];
+        var at = (ed.tip && ed.tip.attrs) || {};
+        Object.keys(at).forEach(function (k) { rows.push([k, at[k]]); });
+        showTip(ev, nodes.get(ed.u).label + (data.directed ? " → " : " - ") + nodes.get(ed.v).label, rows);
+      }
+    });
+    svg.addEventListener("pointerout", function (ev) {
+      var g = ev.target.closest(".ag-n") || ev.target.closest(".ag-e");
+      if (!g) return;
+      var to = ev.relatedTarget;
+      if (to && g.contains(to)) return;
+      hideTip();
+      if (!selected && (!drag || !drag.moved)) restore();
+    });
+
+    // keyboard
+    svg.setAttribute("tabindex", "0");
+    svg.addEventListener("keydown", function (ev) {
+      var step = 40;
+      if (ev.key === "+" || ev.key === "=") zoomAt(W / 2, H / 2, 1.25);
+      else if (ev.key === "-" || ev.key === "_") zoomAt(W / 2, H / 2, 0.8);
+      else if (ev.key === "0") fit();
+      else if (ev.key === "ArrowLeft") { view.x += step; apply(); }
+      else if (ev.key === "ArrowRight") { view.x -= step; apply(); }
+      else if (ev.key === "ArrowUp") { view.y += step; apply(); }
+      else if (ev.key === "ArrowDown") { view.y -= step; apply(); }
+      else if (ev.key === "Escape") { select(null); }
+      else if (ev.key === " " && anim) { togglePlay(); }
+      else return;
+      ev.preventDefault();
+    });
+
+    // ---------------------------------------------------------------- legend
+    function focusGroup(v) {
+      var keys = new Set();
+      data.nodes.forEach(function (n) { if (n.g !== undefined && String(n.g) === v) keys.add(n.k); });
+      focusNodes(keys);
+    }
+    svg.querySelectorAll('.ag-legend-block[data-channel="node_color"] .ag-legend-item[data-value]').forEach(function (it) {
+      var v = it.getAttribute("data-value");
+      it.addEventListener("mouseenter", function () { if (!selected && groupOn === null) focusGroup(v); });
+      it.addEventListener("mouseleave", function () { if (!selected && groupOn === null) focusNodes(null); });
+      it.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        if (selected) select(null);
+        groupOn = groupOn === v ? null : v;
+        restore();
+      });
+    });
+
+    // ---------------------------------------------------------------- toolbar
+    function btn(name) { return app.querySelector('[data-act="' + name + '"]'); }
+    function on(name, fn) { var b = btn(name); if (b) b.addEventListener("click", fn); }
+    on("fit", fit);
+    on("zoom-in", function () { zoomAt(W / 2, H / 2, 1.3); });
+    on("zoom-out", function () { zoomAt(W / 2, H / 2, 1 / 1.3); });
+    var labelMode = 0;
+    on("labels", function () {
+      labelMode = (labelMode + 1) % 3;
+      svg.classList.toggle("ag-labels-all", labelMode === 1);
+      svg.classList.toggle("ag-labels-none", labelMode === 2);
+      btn("labels").setAttribute("aria-pressed", labelMode ? "true" : "false");
+      btn("labels").querySelector(".ag-txt").textContent = ["Labels: auto", "Labels: all", "Labels: off"][labelMode];
+    });
+    function serialize() {
+      var clone = svg.cloneNode(true);
+      clone.classList.remove("ag-focus");
+      clone.removeAttribute("tabindex");
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      return new XMLSerializer().serializeToString(clone);
+    }
+    on("svg", function () { download((data.name || "graph") + ".svg", new Blob([serialize()], { type: "image/svg+xml" })); });
+    on("png", function () {
+      var img = new Image(), url = URL.createObjectURL(new Blob([serialize()], { type: "image/svg+xml" }));
+      img.onload = function () {
+        var s = 2, c = document.createElement("canvas");
+        c.width = W * s; c.height = H * s;
+        var ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, W * s, H * s);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { download((data.name || "graph") + ".png", b); });
+      };
+      img.src = url;
+    });
+
+    // ---------------------------------------------------------------- search
+    var input = app.querySelector(".ag-search input"), results = app.querySelector(".ag-results"), active = -1, matches = [];
+    function renderResults() {
+      results.textContent = "";
+      if (!matches.length) { results.hidden = true; return; }
+      matches.forEach(function (n, i) {
+        var li = el("li", { role: "option", "aria-selected": i === active ? "true" : "false" });
+        li.appendChild(el("span", null, n.label));
+        li.appendChild(el("small", null, (adj.get(n.k).size) + " links"));
+        li.addEventListener("mousedown", function (ev) { ev.preventDefault(); pick(n); });
+        results.appendChild(li);
+      });
+      results.hidden = false;
+    }
+    function pick(n) { select(n.k); centerOn(n); matches = []; renderResults(); input.blur(); }
+    if (input) {
+      input.addEventListener("input", function () {
+        var q = input.value.trim().toLowerCase();
+        active = -1;
+        if (!q) { matches = []; renderResults(); return; }
+        var hits = [];
+        data.nodes.forEach(function (n) {
+          var l = n.label.toLowerCase(), id = String(n.id).toLowerCase();
+          var at = l.indexOf(q), ai = id.indexOf(q);
+          if (at >= 0 || ai >= 0) hits.push({ n: n, s: (at === 0 || ai === 0 ? 0 : 1), d: -adj.get(n.k).size });
+        });
+        hits.sort(function (a, b) { return a.s - b.s || a.d - b.d; });
+        matches = hits.slice(0, 8).map(function (h) { return h.n; });
+        renderResults();
+      });
+      input.addEventListener("keydown", function (ev) {
+        if (ev.key === "ArrowDown") { active = Math.min(active + 1, matches.length - 1); renderResults(); ev.preventDefault(); }
+        else if (ev.key === "ArrowUp") { active = Math.max(active - 1, 0); renderResults(); ev.preventDefault(); }
+        else if (ev.key === "Enter") { if (matches.length) pick(matches[Math.max(active, 0)]); }
+        else if (ev.key === "Escape") { input.value = ""; matches = []; renderResults(); }
+      });
+      input.addEventListener("blur", function () { setTimeout(function () { results.hidden = true; }, 120); });
+    }
+
+    // ---------------------------------------------------------------- table view
+    var tableBox = app.querySelector(".ag-table"), tableBuilt = false;
+    on("table", function () {
+      if (!tableBox) return;
+      tableBox.hidden = !tableBox.hidden;
+      btn("table").setAttribute("aria-pressed", tableBox.hidden ? "false" : "true");
+      if (!tableBuilt) { buildTable(); tableBuilt = true; }
+    });
+    function buildTable() {
+      var keys = [], seen = {};
+      data.nodes.forEach(function (n) {
+        Object.keys((n.tip && n.tip.attrs) || {}).forEach(function (k) { if (!seen[k] && keys.length < 10) { seen[k] = 1; keys.push(k); } });
+      });
+      var base = data.directed ? ["in", "out"] : ["degree"];
+      var cols = ["label"].concat(base, keys);
+      var rows = data.nodes.map(function (n) {
+        var t = n.tip || {}, at = t.attrs || {};
+        return { n: n, v: cols.map(function (c) { return c === "label" ? n.label : (c in t ? t[c] : at[c]); }) };
+      });
+      var table = el("table"), thead = el("thead"), tr = el("tr"), tbody = el("tbody");
+      var sortCol = -1, asc = false;
+      cols.forEach(function (c, i) {
+        var th = el("th", { scope: "col" }, c);
+        th.addEventListener("click", function () {
+          asc = sortCol === i ? !asc : (i === 0);
+          sortCol = i;
+          tr.querySelectorAll("th").forEach(function (h) { h.removeAttribute("aria-sort"); });
+          th.setAttribute("aria-sort", asc ? "ascending" : "descending");
+          rows.sort(function (a, b) {
+            var x = a.v[i], y = b.v[i];
+            if (x === undefined || x === null) return 1;
+            if (y === undefined || y === null) return -1;
+            var r = (typeof x === "number" && typeof y === "number") ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true });
+            return asc ? r : -r;
+          });
+          fill();
+        });
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr); table.appendChild(thead); table.appendChild(tbody); tableBox.appendChild(table);
+      function fill() {
+        tbody.textContent = "";
+        rows.slice(0, 2000).forEach(function (r) {
+          var row = el("tr");
+          r.v.forEach(function (v) { row.appendChild(el("td", typeof v === "number" ? { class: "num" } : null, fmtVal(v))); });
+          row.addEventListener("click", function () { select(r.n.k); centerOn(r.n); });
+          tbody.appendChild(row);
+        });
+      }
+      fill();
+    }
+
+    // ---------------------------------------------------------------- animation
+    var anim = null, frame = 0, playing = false, timer = null;
+    var togglePlay = function () {};
+    if (data.anim) {
+      var A = data.anim;
+      anim = {
+        n: data.nodes.length, T: A.times.length, times: A.times, states: A.states || [], palette: A.palette,
+        frames: b64bytes(A.frames), values: A.values ? new Float32Array(b64bytes(A.values).buffer) : null,
+        fire: A.fire || null, chart: A.chart || null, fmt: A.time_format || "t = {t}"
+      };
+      var slider = app.querySelector(".ag-player input[type=range]"), tlabel = app.querySelector(".ag-time");
+      var readout = app.querySelector(".ag-readout"), cursor = app.querySelector(".ag-chart .ag-cursor");
+      var shapeEls = data.nodes.map(function (n) { return n.el ? n.el.querySelector(".ag-shape") : null; });
+      var textEls = data.nodes.map(function (n) { return n.el ? n.el.querySelector("text") : null; });
+      var current = new Int16Array(anim.n).fill(-1);
+      var fired = [];
+      var setFrame = function (i) {
+        frame = Math.max(0, Math.min(anim.T - 1, i));
+        var base = frame * anim.n;
+        for (var j = 0; j < anim.n; j++) {
+          var c = anim.frames[base + j];
+          if (c === current[j] || !shapeEls[j]) continue;
+          current[j] = c;
+          var p = anim.palette[c];
+          shapeEls[j].setAttribute("fill", p[0]);
+          if (p[1]) shapeEls[j].setAttribute("stroke", p[1]);
+          if (p[2] && textEls[j]) textEls[j].setAttribute("fill", p[2]);
+        }
+        fired.forEach(function (e) { e.classList.remove("ag-fire"); });
+        fired = [];
+        if (anim.fire && anim.fire[frame]) anim.fire[frame].forEach(function (ei) { var e = edges[ei]; if (e && e.el) { e.el.classList.add("ag-fire"); fired.push(e.el); } });
+        if (slider) slider.value = frame;
+        var t = anim.times[frame];
+        if (tlabel) tlabel.textContent = anim.fmt.replace("{t}", fmtVal(Math.round(t * 1000) / 1000)).replace("{i}", frame);
+        if (cursor && anim.chart) {
+          var ch = anim.chart, x = ch.x0 + (t - ch.t0) / ((ch.t1 - ch.t0) || 1) * (ch.x1 - ch.x0);
+          cursor.setAttribute("x1", fmt(x)); cursor.setAttribute("x2", fmt(x));
+        }
+        if (readout && !anim.values) {
+          var counts = new Array(anim.states.length).fill(0);
+          for (var q = 0; q < anim.n; q++) counts[anim.frames[base + q]]++;
+          readout.textContent = "";
+          anim.states.forEach(function (s, si) {
+            var span = el("span", { class: "ag-ro" });
+            var key = el("i"); key.style.background = anim.palette[si][3] || anim.palette[si][0];
+            span.appendChild(key); span.appendChild(el("b", null, counts[si].toLocaleString())); span.appendChild(el("small", null, s));
+            readout.appendChild(span);
+          });
+        }
+      };
+      var speedSel = app.querySelector(".ag-player select");
+      var fps = function () { return Math.max(3, Math.min(30, anim.T / 10)) * (speedSel ? +speedSel.value : 1); };
+      var tick = function () {
+        if (!playing) return;
+        if (frame >= anim.T - 1) { stop(); return; }
+        setFrame(frame + 1);
+        timer = setTimeout(tick, 1000 / fps());
+      };
+      var playBtn = btn("play");
+      var stop = function () { playing = false; clearTimeout(timer); if (playBtn) { playBtn.setAttribute("aria-pressed", "false"); playBtn.querySelector(".ag-txt").textContent = "Play"; } };
+      togglePlay = function () {
+        if (playing) { stop(); return; }
+        if (frame >= anim.T - 1) setFrame(0);
+        playing = true;
+        if (playBtn) { playBtn.setAttribute("aria-pressed", "true"); playBtn.querySelector(".ag-txt").textContent = "Pause"; }
+        tick();
+      };
+      on("play", function () { togglePlay(); });
+      on("step-back", function () { stop(); setFrame(frame - 1); });
+      on("step-fwd", function () { stop(); setFrame(frame + 1); });
+      if (slider) { slider.max = anim.T - 1; slider.addEventListener("input", function () { stop(); setFrame(+slider.value); }); }
+      var chartBox = app.querySelector(".ag-chart svg");
+      if (chartBox && anim.chart) {
+        chartBox.addEventListener("pointermove", function (ev) {
+          if (ev.buttons !== 1) return;
+          var p = chartBox.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+          var q = p.matrixTransform(chartBox.getScreenCTM().inverse()), ch = anim.chart;
+          var t = ch.t0 + (q.x - ch.x0) / (ch.x1 - ch.x0) * (ch.t1 - ch.t0), best = 0;
+          for (var i = 0; i < anim.T; i++) if (Math.abs(anim.times[i] - t) < Math.abs(anim.times[best] - t)) best = i;
+          stop(); setFrame(best);
+        });
+        chartBox.addEventListener("pointerdown", function (ev) { chartBox.setPointerCapture(ev.pointerId); chartBox.dispatchEvent(new PointerEvent("pointermove", { clientX: ev.clientX, clientY: ev.clientY, buttons: 1 })); });
+      }
+      setFrame(data.anim.start || 0);
+      if (data.anim.autoplay) togglePlay();
+    }
+
+    apply();
+    app.agReady = true;
+  }
+
+  function boot() {
+    document.querySelectorAll(".ag-app").forEach(function (app) {
+      if (app.agReady) return;
+      try { init(app); } catch (err) { app.setAttribute("data-error", String(err && err.message || err)); if (window.console) console.error(err); }
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
+</script></body></html>
