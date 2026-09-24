@@ -20,6 +20,7 @@
 
 from __future__ import annotations
 
+import inspect
 import math
 import random
 
@@ -375,9 +376,12 @@ def test_hits(G):
     assert hubs.name == "hubs" and auths.name == "authorities"
     assert_close(hubs, H, tol=1e-7)
     assert_close(auths, A, tol=1e-7)
-    # unnormalised: unit authorities, hubs = A @ authorities (networkx's sign is arbitrary)
+    # unnormalised: unit authorities, hubs = A @ authorities (networkx's sign is arbitrary).
+    # networkx 3.7 made power iteration its default, which max-scales the unnormalised
+    # vectors; the unit-norm convention is its method="svd", so compare against that.
     hubs_u, auths_u = hits(g, normalized=False)
-    H_u, A_u = nx.hits(G, normalized=False)
+    svd = {"method": "svd"} if "method" in inspect.signature(nx.hits).parameters else {}
+    H_u, A_u = nx.hits(G, normalized=False, **svd)
     assert_close(auths_u, {k: abs(v) for k, v in A_u.items()}, tol=1e-7)
     assert_close(hubs_u, {k: abs(v) for k, v in H_u.items()}, tol=1e-7)
 

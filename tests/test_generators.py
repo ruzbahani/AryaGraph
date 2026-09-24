@@ -83,7 +83,7 @@ CLASSIC_CASES = [
     (gen.binomial_tree, (4,), nx.binomial_tree, (4,)),
     (gen.ladder_graph, (5,), nx.ladder_graph, (5,)),
     (gen.circular_ladder_graph, (5,), nx.circular_ladder_graph, (5,)),
-    (gen.circular_ladder_graph, (1,), nx.circular_ladder_graph, (1,)),
+    (gen.circular_ladder_graph, (2,), nx.circular_ladder_graph, (2,)),
     (gen.lollipop_graph, (4, 3), nx.lollipop_graph, (4, 3)),
     (gen.lollipop_graph, (3, 0), nx.lollipop_graph, (3, 0)),
     (gen.barbell_graph, (4, 2), nx.barbell_graph, (4, 2)),
@@ -205,6 +205,12 @@ def test_petersen_properties():
     g = gen.petersen_graph()
     assert set(g.degree().values()) == {3}
     assert nx.girth(nx.Graph(list(g.edges))) == 5
+
+
+@pytest.mark.parametrize("n", [0, 1])
+def test_circular_ladder_needs_two_rungs(n):
+    with pytest.raises(ValueError, match="at least 2"):
+        gen.circular_ladder_graph(n)
 
 
 def test_circular_ladder_directed_rails_are_cycles():

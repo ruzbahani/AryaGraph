@@ -271,10 +271,13 @@ def ladder_graph(n: int, *, directed: bool = False) -> Graph:
 def circular_ladder_graph(n: int, *, directed: bool = False) -> Graph:
     """Ladder whose two rails are closed into cycles (the prism graph ``C_n × K_2``).
 
-    Same numbering as networkx (so ``n = 1`` has self-loops, like networkx).
+    Same numbering as networkx. The prism is only defined for ``n >= 2``, so
+    smaller *n* raises ``ValueError`` (as networkx does since 3.7).
     Directed: both rails are directed cycles and rungs point outward ``i → i+n``.
     """
     n = _count(n)
+    if n < 2:
+        raise ValueError(f"n must be at least 2 for circular_ladder_graph, got {n}")
     g = ladder_graph(n, directed=directed)
     g.name = f"circular_ladder_graph({n})"
     if n:
