@@ -7,6 +7,7 @@
   <img alt="version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-2a78d6">
   <img alt="python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-2a78d6">
   <img alt="license MIT" src="https://img.shields.io/badge/license-MIT-1baf7a">
+  <a href="https://doi.org/10.5281/zenodo.22928604"><img alt="DOI 10.5281/zenodo.22928604" src="https://zenodo.org/badge/DOI/10.5281/zenodo.22928604.svg"></a>
 </p>
 
 AryaGraph is a Python package for graph and DAG visualization, analysis and simulation. It combines publication-quality drawings, interactive views, rigorous algorithms and dynamic simulations in one coherent library.
@@ -16,7 +17,8 @@ AryaGraph is a Python package for graph and DAG visualization, analysis and simu
 - **Author:** Ali Mohammadi Ruzbahani
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
-- **Citing:** [CITATION.cff](CITATION.cff)
+- **Citing:** [doi.org/10.5281/zenodo.22928604](https://doi.org/10.5281/zenodo.22928604) (all versions; v0.1.0 is
+  [10.5281/zenodo.22928895](https://doi.org/10.5281/zenodo.22928895)); see also [CITATION.cff](CITATION.cff)
 - **License:** [MIT](LICENSE)
 
 It provides:

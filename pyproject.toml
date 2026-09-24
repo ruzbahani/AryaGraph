@@ -68,6 +68,7 @@ Homepage = "https://ruzbahani.com/aryagraph"
 Documentation = "https://ruzbahani.com/aryagraph"
 Source = "https://github.com/ruzbahani/AryaGraph"
 Issues = "https://github.com/ruzbahani/AryaGraph/issues"
+DOI = "https://doi.org/10.5281/zenodo.22928604"
 
 [project.optional-dependencies]
 interop = ["networkx>=3.0", "pandas>=1.5", "scipy>=1.9"]
