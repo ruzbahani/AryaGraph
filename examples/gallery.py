@@ -116,7 +116,7 @@ def schedule() -> None:
 def report() -> None:
     rep = ag.analyze(ag.gen.les_miserables())
     path = rep.save(OUT / "report.html")
-    from aryagraph.render.export import find_browser, _run_browser
+    from aryagraph.render.export import HEADLESS_FLAGS, find_browser, _run_browser
 
     browser = find_browser()
     if browser:
@@ -124,7 +124,7 @@ def report() -> None:
 
         with tempfile.TemporaryDirectory() as tmp:
             _run_browser(
-                [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--user-data-dir={tmp}",
+                [browser, *HEADLESS_FLAGS, "--hide-scrollbars", f"--user-data-dir={tmp}",
                  "--window-size=1200,1500", f"--screenshot={OUT / 'report.png'}", path.resolve().as_uri()]
             )
     print(f"  report: {path}")

@@ -24,6 +24,7 @@ import xml.etree.ElementTree as ET
 
 import networkx as nx
 import pytest
+from nxcompat import needs_networkx
 
 import aryagraph.io as nio
 from aryagraph import DAG, CycleError, DiGraph, Graph
@@ -294,6 +295,7 @@ def test_gexf_networkx_interop(tmp_path):
     ours = tmp_path / "aryagraph.gexf"
     campus = ucalgary_campus()  # with pos, written as viz:position
     nio.write_gexf(campus, ours)
+    needs_networkx((3, 6), "GEXF 1.3 files cannot be read")
     H = nx.read_gexf(ours, version="1.3")
     assert [{k: v for k, v in d.items() if k not in ("label", "viz")} for _, d in H.nodes(data=True)] == [
         d for _, d in G.nodes(data=True)

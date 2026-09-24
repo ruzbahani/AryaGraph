@@ -72,7 +72,7 @@ Issues = "https://github.com/ruzbahani/AryaGraph/issues"
 [project.optional-dependencies]
 interop = ["networkx>=3.0", "pandas>=1.5", "scipy>=1.9"]
 png = ["cairosvg>=2.5"]
-test = ["pytest>=7", "networkx>=3.0", "pandas>=1.5", "scipy>=1.9"]
+test = ["pytest>=7", "networkx>=3.4", "pandas>=1.5", "scipy>=1.9"]
 
 [project.scripts]
 aryagraph = "aryagraph.cli:main"

@@ -27,6 +27,7 @@ import random
 import networkx as nx
 import numpy as np
 import pytest
+from nxcompat import needs_networkx
 
 from aryagraph import DAG, DiGraph, Graph
 from aryagraph.algorithms.centrality import (
@@ -98,6 +99,11 @@ def assert_close(ours, theirs, tol=1e-9):
 
 class FixedSample(random.Random):
     """A ``random.Random`` whose ``sample`` returns a preset node list (to mirror our sampling)."""
+
+    def __new__(cls, picks):
+        # Python 3.10's random.Random.__new__ seeds from the constructor argument,
+        # which fails for a list; seed with a constant and keep the picks in __init__.
+        return super().__new__(cls, 0)
 
     def __init__(self, picks):
         super().__init__(0)
@@ -206,27 +212,29 @@ def test_betweenness_sampled_scaling(graph, normalized, endpoints):
     weight = "weight" if graph[0].startswith("w") else None
     picks = _sample_sources(g, 7, seed=3)
     ours = betweenness_centrality(g, normalized=normalized, weight=weight, endpoints=endpoints, k=7, seed=3)
+    # deterministic for a fixed seed
+    assert ours == betweenness_centrality(g, normalized=normalized, weight=weight, endpoints=endpoints, k=7, seed=3)
+    needs_networkx((3, 5), "k-sampled betweenness was rescaled differently")
     theirs = nx.betweenness_centrality(
         G, k=7, normalized=normalized, weight=weight, endpoints=endpoints, seed=FixedSample(picks)
     )
     assert_close(ours, theirs)
-    # deterministic for a fixed seed
-    assert ours == betweenness_centrality(g, normalized=normalized, weight=weight, endpoints=endpoints, k=7, seed=3)
 
 
 def test_betweenness_sampling_edges_and_errors():
     G = nx.gnp_random_graph(20, 0.2, seed=1)
     g = to_ag(G)
     assert betweenness_centrality(g, k=len(g)) == betweenness_centrality(g)
+    with pytest.raises(ValueError):
+        betweenness_centrality(g, k=0)
+    with pytest.raises(ValueError):
+        betweenness_centrality(g, k=21)
+    needs_networkx((3, 6), "k-sampled edge betweenness was rescaled differently")
     picks = _sample_sources(g, 5, seed=0)
     assert_close(
         edge_betweenness_centrality(g, k=5, seed=0),
         nx.edge_betweenness_centrality(G, k=5, seed=FixedSample(picks)),
     )
-    with pytest.raises(ValueError):
-        betweenness_centrality(g, k=0)
-    with pytest.raises(ValueError):
-        betweenness_centrality(g, k=21)
 
 
 @cases(ALL)

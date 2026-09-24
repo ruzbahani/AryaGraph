@@ -72,11 +72,33 @@ def _page(svg: str, width: float, height: float) -> str:
     )
 
 
-def _run_browser(args: list[str]) -> None:
+# Flags that keep headless Chrome from waiting on anything interactive: first-run
+# and default-browser prompts, extension or component updates, and (on macOS) the
+# keychain, which otherwise blocks non-interactive sessions.
+HEADLESS_FLAGS = (
+    "--headless=new",
+    "--disable-gpu",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-extensions",
+    "--disable-background-networking",
+    "--disable-component-update",
+    "--use-mock-keychain",
+    "--password-store=basic",
+)
+
+
+def _run_browser(args: list[str], timeout: float = 120) -> None:
     kwargs = {}
     if sys.platform == "win32":
         kwargs["creationflags"] = 0x08000000  # CREATE_NO_WINDOW
-    subprocess.run(args, check=True, capture_output=True, timeout=120, **kwargs)
+    try:
+        subprocess.run(args, check=True, capture_output=True, timeout=timeout, **kwargs)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(
+            f"the headless browser did not finish within {timeout:g} s; "
+            "install cairosvg (pip install 'aryagraph[png]') for browser-free export"
+        ) from None
 
 
 def svg_to_png(svg: str, path: str | Path, width: float, height: float, scale: float = 2.0) -> Path:
@@ -98,11 +120,8 @@ def svg_to_png(svg: str, path: str | Path, width: float, height: float, scale: f
         _run_browser(
             [
                 browser,
-                "--headless=new",
-                "--disable-gpu",
+                *HEADLESS_FLAGS,
                 "--hide-scrollbars",
-                "--no-first-run",
-                "--no-default-browser-check",
                 f"--user-data-dir={Path(tmp) / 'profile'}",
                 f"--force-device-scale-factor={scale}",
                 f"--window-size={int(round(width))},{int(round(height))}",
@@ -134,9 +153,7 @@ def svg_to_pdf(svg: str, path: str | Path, width: float, height: float) -> Path:
         _run_browser(
             [
                 browser,
-                "--headless=new",
-                "--disable-gpu",
-                "--no-first-run",
+                *HEADLESS_FLAGS,
                 f"--user-data-dir={Path(tmp) / 'profile'}",
                 "--no-pdf-header-footer",
                 f"--print-to-pdf={path.resolve()}",
@@ -148,4 +165,4 @@ def svg_to_pdf(svg: str, path: str | Path, width: float, height: float) -> Path:
     return path
 
 
-__all__ = ["find_browser", "svg_to_png", "svg_to_pdf"]
+__all__ = ["find_browser", "svg_to_png", "svg_to_pdf", "HEADLESS_FLAGS"]

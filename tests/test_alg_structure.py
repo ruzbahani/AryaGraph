@@ -25,6 +25,7 @@ import random
 
 import networkx as nx
 import pytest
+from nxcompat import needs_networkx
 
 from aryagraph import DAG, DiGraph, Graph
 from aryagraph.algorithms.structure import (
@@ -198,6 +199,7 @@ def test_clustering(G):
 
 @cases(ALL)
 def test_square_clustering(G):
+    needs_networkx((3, 5), "square clustering was computed differently")
     assert_close(square_clustering(to_ag(G)), nx.square_clustering(G))
 
 

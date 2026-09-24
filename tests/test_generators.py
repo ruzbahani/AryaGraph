@@ -27,6 +27,7 @@ from collections import Counter
 import networkx as nx
 import numpy as np
 import pytest
+from nxcompat import needs_networkx
 
 from aryagraph import DAG, DiGraph, Graph
 from aryagraph import generators as gen
@@ -119,6 +120,8 @@ DIRECTED_CASES = [
 def test_classic_directed_matches_networkx(fn, args, nx_fn):
     g = fn(*args, directed=True)
     assert type(g) is DiGraph
+    if fn is gen.star_graph:
+        needs_networkx((3, 6), "directed star graphs are not supported")
     assert_same_as_nx(g, nx_fn(*args, create_using=nx.DiGraph), ordered=fn is not gen.binomial_tree)
 
 
