@@ -127,7 +127,8 @@ def hopcroft_karp(g: Graph, top_nodes: Iterable[Node] | None = None) -> dict[Nod
 
     Returns
     -------
-    ``{u: v, v: u, …}``: each matched pair in both directions, in graph order.
+    dict
+        ``{u: v, v: u, …}``: each matched pair in both directions, in graph order.
     """
     require_undirected(g, "hopcroft_karp")
     if top_nodes is None:
@@ -269,11 +270,15 @@ def max_weight_matching(g: Graph, weight: WeightSpec = "weight", maxcardinality:
     maxcardinality:
         If True, the heaviest among the matchings of maximum cardinality.
 
+    Notes
+    -----
     Primal–dual method with blossom shrinking (Galil 1986, after van
     Rantwijk's formulation), O(n³). With integer weights all arithmetic is
     integral and the optimum is exact; with floats it is exact up to
     round-off. Edges of weight ≤ 0 are never needed unless *maxcardinality*.
 
+    Examples
+    --------
     >>> g = Graph([(1, 2, 6), (1, 3, 2), (2, 3, 1), (2, 4, 7), (3, 5, 9), (4, 5, 3)])
     >>> sorted(max_weight_matching(g))
     [(2, 4), (3, 5)]

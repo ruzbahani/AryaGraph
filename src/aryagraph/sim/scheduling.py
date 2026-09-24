@@ -681,8 +681,11 @@ class MonteCarloResult:
     ----------
     makespans:
         ``(runs,)`` makespan of every run.
-    mean, std:
-        Sample mean and standard deviation (``ddof=1``).
+    mean:
+        Sample mean of :attr:`makespans`.
+    std:
+        Sample standard deviation of :attr:`makespans` (``ddof=1``; 0 for a
+        single run).
     percentiles:
         ``{"P50": …, "P80": …, "P95": …}`` (linear interpolation).
     criticality:

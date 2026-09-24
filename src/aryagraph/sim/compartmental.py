@@ -181,8 +181,11 @@ class CompartmentalModel:
 
     @property
     def terminates(self) -> bool:
-        """True when every run must reach an absorbing state: the graph of
-        positive-rate transitions between states has no cycle (SIR yes, SIS no)."""
+        """True when every run must reach an absorbing state.
+
+        That is the case when the graph of positive-rate transitions between
+        states has no cycle (SIR yes, SIS no).
+        """
         succ: dict[str, set[str]] = {s: set() for s in self.states}
         for t in self.transitions:
             if t.rate > 0:

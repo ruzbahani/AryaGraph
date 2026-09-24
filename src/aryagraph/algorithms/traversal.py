@@ -73,6 +73,8 @@ def bfs_edges(
     depth_limit:
         Only explore nodes at most this many hops from *source*.
 
+    Examples
+    --------
     >>> bfs_edges(Graph([(0, 1), (0, 2), (1, 3)]), 0)
     [(0, 1), (0, 2), (1, 3)]
     """

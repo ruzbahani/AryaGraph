@@ -345,6 +345,8 @@ def circular(g: Any, *, order: Sequence[Node] | str | None = None, start_angle: 
     start_angle:
         Angle of the first node in degrees; ``-90`` is 12 o'clock (y down).
 
+    Notes
+    -----
     The radius makes neighbouring nodes about one unit apart.
     """
     nodes = list(g._node)
@@ -389,6 +391,8 @@ def shell(g: Any, *, shells: Sequence[Sequence[Node]] | None = None, seed: int =
         higher degree). Nodes left out of the given shells form an extra
         outer shell.
 
+    Notes
+    -----
     Within every shell after the first, nodes are ordered by the mean angle of
     their neighbours in the previous shell, which avoids most crossings.
     """
@@ -558,6 +562,8 @@ def bipartite(g: Any, *, top: Iterable[Node] | None = None, align: str = "vertic
         ``"vertical"`` gives two columns side by side (first side on the left);
         ``"horizontal"`` gives two rows (first side on top).
 
+    Notes
+    -----
     Both sides are ordered by alternating barycenter sweeps (the best ordering
     seen is kept), which removes most crossings.
     """

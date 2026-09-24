@@ -149,6 +149,8 @@ def independent_cascade(
         ``meta["newly_active"]`` lists the nodes activated at each step and
         ``meta["spread"]`` the final number of active nodes.
 
+    Notes
+    -----
     Every arc's coin is flipped up front from *seed* (the live-edge
     representation), so for a fixed seed the active set grows monotonically
     with the seed set.
@@ -239,17 +241,19 @@ def linear_threshold(
     weight:
         Arc influence before normalisation by in-weight (``None``: all 1).
 
-    Node ``v`` activates when the normalised weight of its active in-neighbours
-    is at least ``θ_v`` (compared with a relative tolerance of 1e-12 so that
-    ``θ = 1`` is reachable despite rounding) and at least one in-neighbour is
-    active; a threshold above 1 can never be reached.
-
     Returns
     -------
     SimulationResult
         One frame per step; ``edge_activity[t]`` holds, for each node activated
         at step ``t``, the arcs from the previous step's newly active nodes whose
         influence tipped it over. ``meta["thresholds"]`` is a :class:`NodeMap`.
+
+    Notes
+    -----
+    Node ``v`` activates when the normalised weight of its active in-neighbours
+    is at least ``θ_v`` (compared with a relative tolerance of 1e-12 so that
+    ``θ = 1`` is reachable despite rounding) and at least one in-neighbour is
+    active; a threshold above 1 can never be reached.
     """
     _check_steps(max_steps)
     arcs = _arcs(g, weight)

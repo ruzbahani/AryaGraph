@@ -113,9 +113,13 @@ class SimulationResult:
         Categorical: state names by code. Continuous: ``[]``.
     roles:
         State name → semantic colour role (one of :data:`ROLES`).
-    model, params, seed:
-        Provenance: model name, its parameters, and the integer seed (``None``
-        when the run was seeded from entropy or an existing generator).
+    model:
+        Provenance: the model name.
+    params:
+        Provenance: the model's parameters, as a dict.
+    seed:
+        Provenance: the integer seed (``None`` when the run was seeded from
+        entropy or an existing generator).
     edge_activity:
         Per frame, the edges ``(u, v)`` that fired since the previous frame
         (transmissions, walker moves, …) oriented from cause to effect; ``None``

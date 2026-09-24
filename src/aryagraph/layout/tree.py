@@ -326,6 +326,8 @@ def tree(
         ``rank_positions``, ``node_sep`` and ``rank_sep``. Forests are drawn
         tree by tree, side by side, sharing level coordinates.
 
+    Notes
+    -----
     Complexity: O(n + m).
     """
     orientation = _check_orientation(orientation)

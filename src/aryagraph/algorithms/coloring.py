@@ -86,8 +86,9 @@ def greedy_color(
 
     Returns
     -------
-    :class:`NodeMap` ``{node: color}`` in graph order. Never uses more than
-    max degree + 1 colors.
+    NodeMap
+        ``{node: color}`` in graph order. Never uses more than max degree + 1
+        colors.
     """
     nbrs = _neighbors(g)
     if callable(strategy):

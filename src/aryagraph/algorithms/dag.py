@@ -366,9 +366,25 @@ class CriticalPath:
         :attr:`length`.
     length:
         The makespan: the earliest time every activity can be finished.
-    earliest_start, earliest_finish, latest_start, latest_finish, slack:
-        Per-node schedule values (:class:`NodeMap`). Slack is how long an
-        activity can slip without delaying the project.
+    earliest_start:
+        Per-node schedule value (:class:`NodeMap`): the earliest time each
+        activity can start, the latest earliest finish among its
+        predecessors (0 for a source).
+    earliest_finish:
+        Per-node schedule value (:class:`NodeMap`): the earliest time each
+        activity can finish, its earliest start plus its duration.
+    latest_start:
+        Per-node schedule value (:class:`NodeMap`): the latest time each
+        activity can start without delaying the project, its latest finish
+        minus its duration.
+    latest_finish:
+        Per-node schedule value (:class:`NodeMap`): the latest time each
+        activity can finish without delaying the project, the earliest
+        latest start among its successors (the makespan for a sink).
+    slack:
+        Per-node schedule value (:class:`NodeMap`): latest start minus
+        earliest start. Slack is how long an activity can slip without
+        delaying the project.
     critical:
         Every activity with zero slack (any of them slipping delays the end).
     """
@@ -491,6 +507,8 @@ def transitive_closure(g: Graph, reflexive: bool | None = False) -> DiGraph:
         cycle, ``True`` to every node (the result is then a :class:`DiGraph`
         even for a DAG), ``None`` adds none.
 
+    Notes
+    -----
     Strongly connected components are contracted first and reachability is
     propagated as bitsets, so the cost is O(n·m / w) plus the output size.
     """

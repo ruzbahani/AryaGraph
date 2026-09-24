@@ -146,6 +146,8 @@ def fruchterman_reingold(
         Abstract layout. Without *fixed*, it is rescaled so the ideal edge
         length is 1 and rotated to its principal axes.
 
+    Notes
+    -----
     Each step moves a node by at most the current temperature, which cools
     linearly to zero; the loop stops early once the mean displacement is tiny.
     """

@@ -30,7 +30,7 @@ It provides:
 - simulation engines for epidemics, cascades, opinion dynamics and project schedules, with animated playback;
 - one-call analytical reports and interactive dashboards.
 
-The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,457 tests and runs on Python 3.10 to 3.13.
+The only runtime dependency is numpy. Layouts are reproducible for the same graph, parameters and random seed; randomized layouts default to `seed=0`. The test suite has 2,458 tests and runs on Python 3.10 to 3.13.
 
 <p align="center">
   <img src="docs/gallery/campus.png" width="49%" alt="University of Calgary campus buildings colored by kind, with the shortest walking route highlighted">

@@ -45,8 +45,12 @@ class EnsembleResult:
         ``(P,)`` common grid, ``linspace(0, longest run, n_points)``.
     samples:
         ``(runs, P, S)`` count of nodes in each state for every run.
-    mean, std:
-        ``{state: (P,) array}``; ``std`` uses ``ddof=1`` (0 for a single run).
+    mean:
+        ``{state: (P,) array}`` holding the mean count of nodes in each state
+        over the runs, at every grid time.
+    std:
+        ``{state: (P,) array}`` holding the standard deviation of that count
+        over the runs; ``std`` uses ``ddof=1`` (0 for a single run).
     quantiles:
         ``{state: {q: (P,) array}}`` for each requested percentile *q*.
     final_sizes:

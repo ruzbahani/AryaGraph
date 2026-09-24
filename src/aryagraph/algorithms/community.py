@@ -106,8 +106,14 @@ def modularity(
     resolution:
         γ; below 1 favours larger communities, above 1 smaller ones.
 
-    Raises ``ValueError`` for a graph whose total edge weight is 0 (modularity is undefined).
+    Raises
+    ------
+    ValueError
+        If *communities* is not a partition of the nodes, or for a graph whose
+        total edge weight is 0 (modularity is undefined).
 
+    Examples
+    --------
     >>> modularity(Graph([(0, 1), (2, 3)]), [{0, 1}, {2, 3}])
     0.5
     """

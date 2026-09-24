@@ -201,13 +201,21 @@ def maximum_flow(g: Graph, s: Node, t: Node, capacity: str | Callable[[Node, Nod
 
     Returns
     -------
-    :class:`FlowResult` with the flow value and ``flow[u][v]`` for every edge.
+    FlowResult
+        The flow value and ``flow[u][v]`` for every edge.
 
     Raises
     ------
-    NodeNotFound; ValueError if ``s == t``, a capacity is negative/NaN, or an
-    all-infinite path makes the flow unbounded.
+    NodeNotFound
+        If *s* or *t* is not in the graph.
+    ValueError
+        If ``s == t`` or a capacity is negative/NaN.
+    UnboundedFlowError
+        If an all-infinite path makes the flow unbounded (a subclass of
+        ``ValueError``).
 
+    Notes
+    -----
     O(n²·m) in general, O(m·√n) on unit-capacity networks.
     """
     net, value = _solve(g, s, t, capacity)

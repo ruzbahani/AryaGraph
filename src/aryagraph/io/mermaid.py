@@ -235,20 +235,32 @@ class _Cursor:
 
 
 def from_mermaid(text: str, *, node_names: str = "id") -> Graph:
-    """Parse a Mermaid flowchart (the subset described in the module docstring).
+    r"""Parse a Mermaid flowchart (the subset described in the module docstring).
 
     Parameters
     ----------
+    text:
+        The Mermaid source, starting with a ``flowchart`` or ``graph`` header.
     node_names:
         ``"id"`` names nodes by their Mermaid id (``A`` in ``A[Start]``) and
         keeps the text as the ``label`` attribute; ``"label"`` names them by
         their text when they have one, which recovers the node names of a
         :func:`to_mermaid` export.
 
+    Returns
+    -------
+    Graph
+        A :class:`DiGraph` when any link has an arrowhead, otherwise an
+        undirected :class:`Graph`.
+
+    Notes
+    -----
     The flow direction is stored as ``g.attrs["direction"]``. Unsupported
     syntax raises ``ValueError`` with the line and column.
 
-    >>> g = from_mermaid("flowchart LR\\n  A[Start] --> B{Ok?} -->|yes| C((Done))")
+    Examples
+    --------
+    >>> g = from_mermaid("flowchart LR\n  A[Start] --> B{Ok?} -->|yes| C((Done))")
     >>> g.nodes["B"]
     {'label': 'Ok?', 'shape': 'diamond'}
     """

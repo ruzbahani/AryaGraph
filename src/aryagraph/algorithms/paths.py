@@ -295,13 +295,21 @@ def shortest_path(
 
     Returns
     -------
-    The node list ``[source, …, target]``; with ``target=None`` a dict
-    ``{node: path}`` over every node reachable from *source*.
+    list or dict
+        The node list ``[source, …, target]``; with ``target=None`` a dict
+        ``{node: path}`` over every node reachable from *source*.
 
     Raises
     ------
-    NodeNotFound, NoPath, NegativeCycleError (Bellman–Ford only)
+    NodeNotFound
+        If *source* or *target* is not a node of the graph.
+    NoPath
+        If *target* is given but cannot be reached from *source*.
+    NegativeCycleError
+        Bellman–Ford only: if a negative cycle is reachable from *source*.
 
+    Examples
+    --------
     >>> shortest_path(Graph([("a", "b"), ("b", "c"), ("a", "c", 5)]), "a", "c", weight="weight")
     ['a', 'b', 'c']
     """

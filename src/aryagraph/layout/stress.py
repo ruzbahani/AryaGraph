@@ -249,6 +249,8 @@ def stress(
         ``Σ (‖x_i − x_j‖/d_ij − 1)² / 2``. Disconnected graphs are laid out per
         component and packed.
 
+    Notes
+    -----
     Complexity: O(n·m) for distances, O(n³) once for the Laplacian solve and
     O(n²) per iteration (about a second for 1000 nodes).
     """

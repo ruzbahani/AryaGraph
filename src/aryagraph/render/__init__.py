@@ -90,8 +90,8 @@ def draw(
     labels:
         ``"auto"`` (all labels for ≤ 80 nodes, else the 30 most prominent),
         ``True``/``False``, an int (top-k), or an attribute / mapping / callable
-        giving the text. Labels never overlap nodes or each other; those that
-        cannot be placed are hidden (``label_collisions="show"`` keeps them).
+        giving the text. The label placer avoids overlaps and hides labels
+        that cannot fit (``label_collisions="show"`` keeps them).
     label_position:
         ``"auto"``, ``"center"`` (inside the node), ``"right"``, ``"left"``,
         ``"above"``, ``"below"`` or a diagonal like ``"below-right"``.
